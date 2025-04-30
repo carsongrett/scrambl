@@ -502,9 +502,13 @@
             // Update final score display
             document.getElementById("final-score-display").textContent = `${wordsSolved} words | ${score} points`;
 
-            // Update share link
+            // Update share link with proper date format
             const gameLink = window.location.href;
-            const shareMessage = `Scrambl ${formatDateForDisplay(today)}: ${score} points. ${gameLink}`;
+            const currentDate = new Date();
+            const options = { weekday: 'long', month: 'short', day: 'numeric' };
+            const formattedDate = currentDate.toLocaleDateString('en-US', options);
+            
+            const shareMessage = `Scrambl ${formattedDate}: ${score} points. ${gameLink}`;
             document.getElementById("share-link").href = `sms:?&body=${encodeURIComponent(shareMessage)}`;
             document.getElementById("share-link-played").href = `sms:?&body=${encodeURIComponent(shareMessage)}`;
 
@@ -599,8 +603,12 @@
                     const lastWordsSolved = localStorage.getItem('wordsSolved') || "0";
                     todayScoreElement.textContent = `${lastWordsSolved} words | ${lastScore} points`;
 
-                    // Update share link
+                    // Update share link with proper date format
                     const gameLink = window.location.href;
+                    const currentDate = new Date();
+                    const options = { weekday: 'long', month: 'short', day: 'numeric' };
+                    const formattedDate = currentDate.toLocaleDateString('en-US', options);
+                    
                     const shareMessage = `Scrambl ${formattedDate}: ${lastScore} points. ${gameLink}`;
                     document.getElementById("share-link-played").href = `sms:?&body=${encodeURIComponent(shareMessage)}`;
                 } catch (error) {

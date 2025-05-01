@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scrambl</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L4YDGSZDV1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-L4YDGSZDV1');
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -474,16 +482,36 @@
                 userGuessInput.value = ""; // Clear the input field
                 currentWordIndex++;
                 getNextWord();
+                
+                // Track correct word event in Google Analytics
+                gtag('event', 'correct_word', {
+                    'event_category': 'gameplay',
+                    'event_label': currentWord,
+                    'value': points
+                });
             } else if (userGuess !== "") {
                 // Incorrect answer
                 messageElement.textContent = "Try again!";
                 messageElement.className = "incorrect";
+                
+                // Track incorrect guess in Google Analytics
+                gtag('event', 'incorrect_guess', {
+                    'event_category': 'gameplay',
+                    'event_label': currentWord
+                });
             }
         }
 
         // Function to skip current word
         function skipWord() {
             if (!gameActive) return;
+            
+            // Track skip word event in Google Analytics
+            gtag('event', 'skip_word', {
+                'event_category': 'gameplay',
+                'event_label': currentWord
+            });
+            
             userGuessInput.value = ""; // Clear the input field
             currentWordIndex++;
             getNextWord();
@@ -512,6 +540,14 @@
             document.getElementById("share-link").href = `sms:?&body=${encodeURIComponent(shareMessage)}`;
             document.getElementById("share-link-played").href = `sms:?&body=${encodeURIComponent(shareMessage)}`;
 
+            // Track game completed event in Google Analytics
+            gtag('event', 'game_completed', {
+                'event_category': 'gameplay',
+                'event_label': 'daily_challenge',
+                'value': score,
+                'words_solved': wordsSolved
+            });
+            
             // Save today's play
             saveToday(score);
             
@@ -529,6 +565,12 @@
             if (hasPlayedToday()) {
                 return; // Don't allow starting if already played today
             }
+            
+            // Track game start event in Google Analytics
+            gtag('event', 'game_start', {
+                'event_category': 'gameplay',
+                'event_label': 'daily_challenge'
+            });
             
             // Reset game variables
             currentWordIndex = 0;
@@ -596,6 +638,12 @@
             // Log the first few words to confirm they are different each day
             console.log("Today's first few words:", dailyWords.slice(0, 5));
 
+            // Track page view with the page title in Google Analytics
+            gtag('event', 'page_view', {
+                'page_title': 'Scrambl Daily Challenge',
+                'page_location': window.location.href
+            });
+
             // Check if the user has played today
             if (hasPlayedToday()) {
                 try {
@@ -611,6 +659,13 @@
                     
                     const shareMessage = `Scrambl ${formattedDate}: ${lastScore} points. ${gameLink}`;
                     document.getElementById("share-link-played").href = `sms:?&body=${encodeURIComponent(shareMessage)}`;
+                    
+                    // Track returning player view in Google Analytics
+                    gtag('event', 'returning_player', {
+                        'event_category': 'user',
+                        'event_label': 'already_played',
+                        'value': parseInt(lastScore)
+                    });
                 } catch (error) {
                     console.error("Local storage error:", error);
                 }
@@ -623,6 +678,12 @@
                 updateCountdown();
                 setInterval(updateCountdown, 60000); // Update every minute
             } else {
+                // Track new gameplay opportunity in Google Analytics
+                gtag('event', 'new_gameplay_opportunity', {
+                    'event_category': 'user',
+                    'event_label': 'not_played_yet'
+                });
+                
                 // Show start screen
                 startScreen.style.display = "block";
                 playedToday.style.display = "none";
@@ -633,6 +694,24 @@
         startButton.addEventListener("click", startGame);
         submitButton.addEventListener("click", checkAnswer);
         skipButton.addEventListener("click", skipWord);
+
+        // Track share button clicks
+        document.getElementById("share-link").addEventListener("click", function() {
+            gtag('event', 'share', {
+                'event_category': 'engagement',
+                'event_label': 'share_score',
+                'value': score
+            });
+        });
+        
+        document.getElementById("share-link-played").addEventListener("click", function() {
+            const lastScore = localStorage.getItem('lastScore') || "0";
+            gtag('event', 'share', {
+                'event_category': 'engagement',
+                'event_label': 'share_score_played',
+                'value': parseInt(lastScore)
+            });
+        });
 
         // Enter key to submit
         userGuessInput.addEventListener("keypress", (e) => {

@@ -122,30 +122,6 @@
                 });
             },
             
-            // Track game started
-            trackGameStart: function() {
-                gtag('event', 'Scrambl_Game_Started', {
-                    'event_category': 'Game Actions'
-                });
-            },
-            
-            // Track correct words
-            trackCorrectWord: function(word) {
-                gtag('event', 'Scrambl_Correct_Word', {
-                    'event_category': 'Game Actions',
-                    'word': word
-                });
-            },
-            
-            // Track incorrect guesses
-            trackIncorrectGuess: function(word, guess) {
-                gtag('event', 'Scrambl_Incorrect_Guess', {
-                    'event_category': 'Game Actions',
-                    'word': word,
-                    'guess': guess
-                });
-            },
-            
             // Track game completed
             trackGameCompleted: function(score, wordsSolved) {
                 gtag('event', 'Scrambl_Game_Completed', {
@@ -194,7 +170,6 @@
         const GAME_TIME = 30;
         let dailyWords = [], currentWordIndex = 0, currentWord = "", currentScrambled = "";
         let score = 0, wordsSolved = 0, timeLeft = GAME_TIME, gameActive = false, today, timer;
-        let correctWords = 0, incorrectGuesses = 0; // Track for analytics
 
         // Cache DOM elements
         const elements = {
@@ -329,23 +304,15 @@
                 const points = currentWord.length * 10;
                 score += points;
                 wordsSolved++;
-                correctWords++; // For analytics
                 elements.score.textContent = score;
                 elements.wordsSolved.textContent = wordsSolved;
                 elements.userGuess.value = "";
                 currentWordIndex++;
                 
-                // Track correct word
-                analytics.trackCorrectWord(currentWord);
-                
                 getNextWord();
             } else if (userGuess !== "") {
                 elements.message.textContent = "Try again!";
                 elements.message.className = "incorrect";
-                incorrectGuesses++; // For analytics
-                
-                // Track incorrect guess
-                analytics.trackIncorrectGuess(currentWord, userGuess);
             }
         }
 
@@ -390,13 +357,6 @@
 
         function startGame() {
             if (hasPlayedToday()) return;
-            
-            // Reset tracking counters
-            correctWords = 0;
-            incorrectGuesses = 0;
-            
-            // Track game start
-            analytics.trackGameStart();
             
             // Reset game variables
             currentWordIndex = 0;

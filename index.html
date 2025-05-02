@@ -26,10 +26,32 @@
         h1 {color:#fff; margin-bottom:10px; font-size:2.5em; letter-spacing:2px; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,0.2);}
         
         /* Input and buttons */
-        input {padding:12px 16px; font-size:1.1em; border:none; border-radius:12px; width:65%; margin-right:10px; background-color:#333; color:#fff; box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);}
-        button {padding:12px 20px; background-color:#2196f3; color:white; border:none; border-radius:12px; font-size:1.1em; cursor:pointer; transition:all 0.2s ease; font-weight:600; box-shadow:0 4px 8px rgba(0,0,0,0.2);}
+        input {
+            padding:12px 16px; 
+            font-size:1.1em; 
+            border:none; 
+            border-radius:12px; 
+            width:65%; 
+            margin-right:10px; 
+            background-color:#333; 
+            color:#fff; 
+            box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding:12px 20px; 
+            background-color:#2196f3; 
+            color:white; 
+            border:none; 
+            border-radius:12px; 
+            font-size:1.1em; 
+            cursor:pointer; 
+            transition:all 0.2s ease; 
+            font-weight:600; 
+            box-shadow:0 4px 8px rgba(0,0,0,0.2);
+        }
         button:hover {background-color:#0d8bf2; transform:translateY(-2px); box-shadow:0 6px 12px rgba(0,0,0,0.2);}
         button:active {transform:translateY(1px); box-shadow:0 2px 4px rgba(0,0,0,0.2);}
+        button:focus {outline: 3px solid #4fc3f7; outline-offset: 2px;}
         .buttons {margin:24px 0;}
         
         /* Game elements */
@@ -45,6 +67,15 @@
             padding: 10px;
             background-color: rgba(33,33,33,0.5);
             border-radius: 8px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        /* Add animation for new word appearance */
+        .scrambled-word.new-word {
+            animation: newWord 0.6s ease-out;
+        }
+        @keyframes newWord {
+            0% {transform: scale(0.8); opacity: 0;}
+            100% {transform: scale(1); opacity: 1;}
         }
         @keyframes float {
             0% {transform: translateY(0px);}
@@ -53,9 +84,21 @@
         }
         #message {margin:20px 0; font-weight:bold; min-height:24px; transition:all 0.3s ease;}
         #message.correct {color:#4caf50; animation:pulse 0.5s;}
-        #message.incorrect {color:#f44336;}
+        #message.incorrect {color:#f44336; animation:shake 0.5s;}
+        /* Add shake animation for incorrect answers */
+        @keyframes shake {
+            0%, 100% {transform: translateX(0);}
+            20%, 60% {transform: translateX(-5px);}
+            40%, 80% {transform: translateX(5px);}
+        }
         .score {margin-top:20px; font-weight:bold;}
         .timer {font-size:1.3em; margin-bottom:15px; color:#f44336; font-weight:bold;}
+        /* Add pulse animation for timer when low */
+        .timer.low {animation: timerPulse 1s infinite;}
+        @keyframes timerPulse {
+            0%, 100% {opacity: 1;}
+            50% {opacity: 0.7;}
+        }
         .game-over, .game-play, .played-today {display:none;}
         .game-over {font-size:1.5em; color:#e0e0e0; margin:20px 0;}
         .final-score {font-size:1.5em; color:#4caf50; margin:20px 0;}
@@ -64,9 +107,84 @@
         .start-screen {padding:20px;}
         .countdown {font-size:1.2em; color:#f44336; margin:20px 0;}
         .daily-date {font-size:1.3em; color:#4fc3f7; margin-bottom:24px; font-weight:600;}
-        .score-display {margin:15px 0; font-size:1.3em; font-weight:bold; color:#4fc3f7; background:rgba(33,150,243,0.1); padding:10px; border-radius:12px;}
-        .share-score a {display:inline-block; background-color:#4caf50; color:white; padding:12px 24px; border-radius:12px; text-decoration:none; margin-top:16px; font-size:1.2em; font-weight:600; box-shadow:0 4px 8px rgba(0,0,0,0.2); transition:all 0.2s ease;}
+        .score-display {
+            margin:15px 0; 
+            font-size:1.3em; 
+            font-weight:bold; 
+            color:#4fc3f7; 
+            background:rgba(33,150,243,0.1); 
+            padding:10px; 
+            border-radius:12px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        /* Add streak display */
+        .streak-display {
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #ffeb3b;
+        }
+        /* Removed difficulty selector and hint system styles as requested */
+        .share-score {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .share-score a {
+            display:inline-block; 
+            background-color:#4caf50; 
+            color:white; 
+            padding:12px 24px; 
+            border-radius:12px; 
+            text-decoration:none; 
+            font-size:1.2em; 
+            font-weight:600; 
+            box-shadow:0 4px 8px rgba(0,0,0,0.2); 
+            transition:all 0.2s ease;
+        }
         .share-score a:hover {background-color:#3d9a40; transform:translateY(-2px);}
+        /* Add share buttons for different platforms */
+        .share-score .twitter-share {background-color:#1da1f2;}
+        .share-score .twitter-share:hover {background-color:#0d8ecf;}
+        
+        /* Progress bar for timer */
+        .timer-progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #424242;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .timer-progress {
+            height: 100%;
+            background-color: #f44336;
+            width: 100%;
+            transition: width 1s linear;
+        }
+        
+        /* Combo system */
+        .combo-display {
+            font-size: 1.1em;
+            color: #ff9800;
+            margin-top: 5px;
+            animation: fadeOut 2s forwards;
+            opacity: 0;
+        }
+        .combo-display.active {
+            animation: fadeIn 0.3s forwards;
+            opacity: 1;
+        }
+        @keyframes fadeIn {
+            0% {opacity: 0; transform: translateY(10px);}
+            100% {opacity: 1; transform: translateY(0);}
+        }
+        @keyframes fadeOut {
+            0% {opacity: 1;}
+            100% {opacity: 0;}
+        }
         
         /* Animations */
         @keyframes pulse {
@@ -81,9 +199,27 @@
             .game-container {padding:18px; border-radius:12px;}
             h1 {font-size:2.2em;}
             .scrambled-word {font-size:2em; letter-spacing:8px;}
-            input {width:60%; padding:10px 14px;}
-            button {padding:10px 16px;}
+            .input-area {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            input {
+                width:90%; 
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            button {
+                padding:10px 16px;
+                width: 80%;
+            }
             .score-display {font-size:1.1em;}
+            .share-score {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -96,387 +232,576 @@
             <p>A new scrambl every day</p>
             <p>solve the most words in 30 seconds</p>
             <p>10 points for each letter in a word</p>
-            <p>share your score - leaderboard soon</p>
-            <button id="start-game">Play</button>
+            
+            <!-- Removed difficulty selector as requested -->
+            
+            <!-- Added streak display -->
+            <div class="streak-display" id="streak-display"></div>
+            
+            <p>share your score - leaderboard coming soon</p>
+            <button id="start-game" role="button" aria-label="Start game">Play</button>
         </div>
 
         <div class="played-today" id="played-today">
             <p>Already played today.</p>
             <div class="final-score">Score: <span id="today-score">0</span></div>
+            <div class="streak-display" id="current-streak-display"></div>
             <div class="countdown" id="countdown"></div>
             <div class="share-score">
-                <a id="share-link-played" href="#" target="_blank">Share</a>
+                <a id="share-link-played" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
+                <a id="twitter-share-played" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
             </div>
         </div>
 
         <div class="game-play" id="game-play">
+            <!-- Added timer progress bar -->
+            <div class="timer-progress-container">
+                <div class="timer-progress" id="timer-progress"></div>
+            </div>
             <div class="timer" id="timer">Time: 30s</div>
             <div class="score-display">
-                <div>Words solved: <span id="words-solved">0</span> | Score: <span id="score">0</span></div>
+                <div>Words: <span id="words-solved">0</span></div>
+                <div>Score: <span id="score">0</span></div>
             </div>
-            <div class="scrambled-word" id="scrambled-word">RDOW</div>
-            <div>
-                <input type="text" id="user-guess" placeholder="Enter your answer" autocomplete="off">
-                <button id="submit-btn">Submit</button>
+            
+            <!-- Added combo display -->
+            <div class="combo-display" id="combo-display"></div>
+            
+            <div class="scrambled-word" id="scrambled-word" aria-live="polite">RDOW</div>
+            
+            <div class="input-area">
+                <input type="text" id="user-guess" placeholder="Enter your answer" autocomplete="off" aria-label="Your answer">
+                <button id="submit-btn" aria-label="Submit answer">Submit</button>
             </div>
+            
             <div class="buttons">
-                <button id="skip-btn">Skip</button>
+                <button id="skip-btn" aria-label="Skip this word">Skip</button>
+                <!-- Removed hint button as requested -->
             </div>
-            <div id="message"></div>
+            
+            <div id="message" aria-live="assertive"></div>
+            <!-- Removed hint display as requested -->
         </div>
 
         <div class="game-over" id="game-over">
             <p>Game Over</p>
             <div class="final-score" id="final-score-display"></div>
+            <!-- Added streak display to game over screen -->
+            <div class="streak-display" id="game-over-streak-display"></div>
             <div class="share-score">
-                <a id="share-link" href="#" target="_blank">Share</a>
+                <a id="share-link" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
+                <a id="twitter-share" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
             </div>
             <div class="countdown" id="countdown-end"></div>
         </div>
     </div>
 
     <script>
-        // Analytics tracking
-        const analytics = {
-            // Track unique page visits
-            trackPageView: function() {
-                gtag('event', 'Scrambl_Page_Visit', {
-                    'page_title': 'Scrambl Word Game',
-                    'page_location': window.location.href
-                });
-            },
-            
-            // Track game completed
-            trackGameCompleted: function(score, wordsSolved) {
-                gtag('event', 'Scrambl_Game_Completed', {
-                    'event_category': 'Game Actions',
-                    'score': score,
-                    'words_solved': wordsSolved
-                });
-            },
-            
-            // Track share button clicks
-            trackShare: function(context, score) {
-                gtag('event', 'Scrambl_Score_Shared', {
-                    'event_category': 'Game Actions',
-                    'share_context': context,
-                    'score': score
-                });
-            }
-        };
-
-        // Word list - simplified to array initialization
-        const allWords = [
-            // 50 three-letter words
-    "ACE", "APE", "ART", "BAG", "BAT", "BEE", "BOX", "BUG", "BUS", "CAP", 
-    "CAT", "COW", "CUP", "DAY", "DOG", "EAR", "EGG", "EYE", "FAN", "FIN", 
-    "FLY", "FOX", "FUN", "GEM", "HAT", "HEN", "ICE", "JAR", "JOY", "KEY", 
-    "KID", "LAW", "LEG", "LIP", "MAP", "MUD", "NET", "OWL", "PEN", "PIE", 
-    "PIN", "RAT", "RUG", "SKY", "SUN", "TOE", "TOP", "VAN", "WEB", "ZOO",
-    
-    // 50 four-letter words
-    "ABLE", "BABY", "BALL", "BEAR", "BELT", "BIKE", "BIRD", "BOAT", "BOOK", "BOWL", 
-    "CAKE", "CARD", "CASH", "CHEF", "COIN", "COOL", "DART", "DESK", "DISH", "DOOR", 
-    "DRUM", "DUCK", "FISH", "FLAG", "FROG", "GAME", "GIFT", "GOLD", "HAIR", "HAND", 
-    "HERO", "HOOK", "JUMP", "KITE", "LAMP", "LEAF", "MASK", "MOON", "NAIL", "PARK", 
-    "PLUG", "RAIN", "RING", "ROCK", "ROPE", "SHIP", "SHOE", "STAR", "TIRE", "TREE",
-    
-    // 50 five-letter words
-    "APPLE", "BEACH", "BREAD", "BRICK", "BRUSH", "CHAIR", "CHEESE", "CLOCK", "CLOUD", "DANCE", 
-    "DREAM", "DRESS", "DRINK", "EAGLE", "EARTH", "FLAME", "FLUTE", "GHOST", "GLOBE", "GLOVE", 
-    "GRAPE", "GREEN", "HOTEL", "HOUSE", "JEWEL", "KNIFE", "LEMON", "LIGHT", "MAGIC", "MEDAL", 
-    "MONEY", "MOUSE", "MUSIC", "OCEAN", "PAINT", "PAPER", "PHONE", "PIANO", "PLANT", "PLATE", 
-    "QUEEN", "RIVER", "ROBOT", "SMILE", "SNAKE", "SPACE", "SPOON", "STORM", "TIGER", "WATER",
-    
-    // 25 six-letter words
-    "BANANA", "BUTTON", "CAMERA", "COFFEE", "DRAGON", "FOREST", "GARDEN", "GUITAR", "ISLAND", "JACKET", 
-    "LADDER", "MARKET", "MONKEY", "ORANGE", "PENCIL", "POCKET", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
-    "TURTLE", "VELVET", "WALLET", "WINDOW", "WINTER",
-    
-    // 25 seven-letter words
-    "AIRPLANE", "BICYCLE", "CANDLE", "DIAMOND", "ELEPHANT", "FEATHER", "GATEWAY", "HORIZON", "JOURNEY", "KITCHEN", 
-    "LIBRARY", "MORNING", "NECKLACE", "OCTOPUS", "PENGUIN", "RAINBOW", "SHUTTLE", "TEAPOT", "UMBRELLA", "VILLAGE", 
-    "WHISTLE", "YOGURT", "ZEBRA", "DOLPHIN", "BLOSSOM"
-        ];
-
-        // Game constants and variables
-        const GAME_TIME = 30;
-        let dailyWords = [], currentWordIndex = 0, currentWord = "", currentScrambled = "";
-        let score = 0, wordsSolved = 0, timeLeft = GAME_TIME, gameActive = false, today, timer;
-
-        // Cache DOM elements
-        const elements = {
-            startScreen: document.getElementById("start-screen"),
-            playedToday: document.getElementById("played-today"),
-            gamePlay: document.getElementById("game-play"),
-            gameOver: document.getElementById("game-over"),
-            startButton: document.getElementById("start-game"),
-            scrambledWord: document.getElementById("scrambled-word"),
-            userGuess: document.getElementById("user-guess"),
-            submitBtn: document.getElementById("submit-btn"),
-            skipBtn: document.getElementById("skip-btn"),
-            message: document.getElementById("message"),
-            score: document.getElementById("score"),
-            timer: document.getElementById("timer"),
-            wordsSolved: document.getElementById("words-solved"),
-            countdown: document.getElementById("countdown"),
-            countdownEnd: document.getElementById("countdown-end"),
-            todayScore: document.getElementById("today-score"),
-            dailyDate: document.getElementById("daily-date"),
-            shareLink: document.getElementById("share-link"),
-            shareLinkPlayed: document.getElementById("share-link-played")
-        };
-
-        // Helper functions
-        function getCurrentDateCT() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        function getTimeUntilMidnightLocal() {
-            const now = new Date();
-            const midnight = new Date(now);
-            midnight.setHours(24, 0, 0, 0);
-            return midnight - now;
-        }
-
-        function updateCountdown() {
-            const msLeft = getTimeUntilMidnightLocal();
-            const hoursLeft = Math.floor(msLeft / (1000 * 60 * 60));
-            const minutesLeft = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const countdownText = `Next: ${hoursLeft}h ${minutesLeft}m`;
-            elements.countdown.textContent = countdownText;
-            elements.countdownEnd.textContent = countdownText;
-            if (msLeft <= 0) window.location.reload();
-        }
-
-        function seededRandom(seed) {
-            let t = seed + 0x6D2B79F5;
-            t = Math.imul(t ^ t >>> 15, t | 1);
-            t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-            return ((t ^ t >>> 14) >>> 0) / 4294967296;
-        }
-
-        // Game functions
-        function getDailyWords(dateStr) {
-            let seed = 0;
-            for (let i = 0; i < dateStr.length; i++) seed += dateStr.charCodeAt(i);
-            
-            const shuffledWords = [...allWords];
-            for (let i = shuffledWords.length - 1; i > 0; i--) {
-                const j = Math.floor(seededRandom(seed + i) * (i + 1));
-                [shuffledWords[i], shuffledWords[j]] = [shuffledWords[j], shuffledWords[i]];
-            }
-            return shuffledWords.slice(0, 30);
-        }
-
-        function scrambleWord(word, dateStr, wordIndex) {
-            const wordArray = word.split("");
-            let seed = 0;
-            for (let i = 0; i < dateStr.length; i++) seed += dateStr.charCodeAt(i);
-            seed += wordIndex * 100;
-
-            for (let i = wordArray.length - 1; i > 0; i--) {
-                const j = Math.floor(seededRandom(seed + i) * (i + 1));
-                [wordArray[i], wordArray[j]] = [wordArray[j], wordArray[i]];
-            }
-
-            let scrambled = wordArray.join("");
-            if (scrambled === word && wordArray.length >= 2) {
-                [wordArray[0], wordArray[1]] = [wordArray[1], wordArray[0]];
-                scrambled = wordArray.join("");
-            }
-            return scrambled;
-        }
-
-        function hasPlayedToday() {
-            try {
-                const playedDate = localStorage.getItem('lastPlayedDate');
-                if (!playedDate) return false;
-                const playedDateClean = playedDate.split("?")[0];
-                const todayClean = today.split("?")[0];
-                return playedDateClean === todayClean;
-            } catch (error) {
-                console.error("Local storage error:", error);
-                return false;
-            }
-        }
-
-        function saveToday(finalScore) {
-            try {
-                localStorage.setItem('lastPlayedDate', today);
-                localStorage.setItem('lastScore', finalScore);
-                localStorage.setItem('wordsSolved', wordsSolved);
-            } catch (error) {
-                console.error("Local storage error:", error);
-            }
-        }
-
-        function getNextWord() {
-            if (currentWordIndex >= dailyWords.length) currentWordIndex = 0;
-            currentWord = dailyWords[currentWordIndex];
-            currentScrambled = scrambleWord(currentWord, today.split("?")[0], currentWordIndex);
-            elements.scrambledWord.textContent = currentScrambled;
-            elements.userGuess.value = "";
-            elements.message.textContent = "";
-            elements.message.className = "";
-            elements.userGuess.focus();
-        }
-
-        function checkAnswer() {
-            if (!gameActive) return;
-            const userGuess = elements.userGuess.value.trim().toUpperCase();
-
-            if (userGuess === currentWord) {
-                elements.message.textContent = "Correct!";
-                elements.message.className = "correct";
+        // Game module pattern
+        const ScramblGame = (function() {
+            // Analytics module
+            const analytics = {
+                trackPageView: function() {
+                    gtag('event', 'Scrambl_Page_Visit', {
+                        'page_title': 'Scrambl Word Game',
+                        'page_location': window.location.href
+                    });
+                },
                 
-                const points = currentWord.length * 10;
-                score += points;
-                wordsSolved++;
-                elements.score.textContent = score;
-                elements.wordsSolved.textContent = wordsSolved;
-                elements.userGuess.value = "";
-                currentWordIndex++;
+                trackGameCompleted: function(score, wordsSolved, difficulty) {
+                    gtag('event', 'Scrambl_Game_Completed', {
+                        'event_category': 'Game Actions',
+                        'score': score,
+                        'words_solved': wordsSolved,
+                        'difficulty': difficulty
+                    });
+                },
                 
-                getNextWord();
-            } else if (userGuess !== "") {
-                elements.message.textContent = "Try again!";
-                elements.message.className = "incorrect";
+                trackShare: function(context, score, platform) {
+                    gtag('event', 'Scrambl_Score_Shared', {
+                        'event_category': 'Game Actions',
+                        'share_context': context,
+                        'score': score,
+                        'platform': platform
+                    });
+                },
+                
+                    // Removed difficulty selection and hint usage tracking as requested
+            };
+
+            // Word list - simplified to array initialization
+            const allWords = [
+                // 50 three-letter words
+                "ACE", "APE", "ART", "BAG", "BAT", "BEE", "BOX", "BUG", "BUS", "CAP", 
+                "CAT", "COW", "CUP", "DAY", "DOG", "EAR", "EGG", "EYE", "FAN", "FIN", 
+                "FLY", "FOX", "FUN", "GEM", "HAT", "HEN", "ICE", "JAR", "JOY", "KEY", 
+                "KID", "LAW", "LEG", "LIP", "MAP", "MUD", "NET", "OWL", "PEN", "PIE", 
+                "PIN", "RAT", "RUG", "SKY", "SUN", "TOE", "TOP", "VAN", "WEB", "ZOO",
+                
+                // 50 four-letter words
+                "ABLE", "BABY", "BALL", "BEAR", "BELT", "BIKE", "BIRD", "BOAT", "BOOK", "BOWL", 
+                "CAKE", "CARD", "CASH", "CHEF", "COIN", "COOL", "DART", "DESK", "DISH", "DOOR", 
+                "DRUM", "DUCK", "FISH", "FLAG", "FROG", "GAME", "GIFT", "GOLD", "HAIR", "HAND", 
+                "HERO", "HOOK", "JUMP", "KITE", "LAMP", "LEAF", "MASK", "MOON", "NAIL", "PARK", 
+                "PLUG", "RAIN", "RING", "ROCK", "ROPE", "SHIP", "SHOE", "STAR", "TIRE", "TREE",
+                
+                // 50 five-letter words
+                "APPLE", "BEACH", "BREAD", "BRICK", "BRUSH", "CHAIR", "CHEESE", "CLOCK", "CLOUD", "DANCE", 
+                "DREAM", "DRESS", "DRINK", "EAGLE", "EARTH", "FLAME", "FLUTE", "GHOST", "GLOBE", "GLOVE", 
+                "GRAPE", "GREEN", "HOTEL", "HOUSE", "JEWEL", "KNIFE", "LEMON", "LIGHT", "MAGIC", "MEDAL", 
+                "MONEY", "MOUSE", "MUSIC", "OCEAN", "PAINT", "PAPER", "PHONE", "PIANO", "PLANT", "PLATE", 
+                "QUEEN", "RIVER", "ROBOT", "SMILE", "SNAKE", "SPACE", "SPOON", "STORM", "TIGER", "WATER",
+                
+                // 25 six-letter words
+                "BANANA", "BUTTON", "CAMERA", "COFFEE", "DRAGON", "FOREST", "GARDEN", "GUITAR", "ISLAND", "JACKET", 
+                "LADDER", "MARKET", "MONKEY", "ORANGE", "PENCIL", "POCKET", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
+                "TURTLE", "VELVET", "WALLET", "WINDOW", "WINTER",
+                
+                // 25 seven-letter words
+                "AIRPLANE", "BICYCLE", "CANDLE", "DIAMOND", "ELEPHANT", "FEATHER", "GATEWAY", "HORIZON", "JOURNEY", "KITCHEN", 
+                "LIBRARY", "MORNING", "NECKLACE", "OCTOPUS", "PENGUIN", "RAINBOW", "SHUTTLE", "TEAPOT", "UMBRELLA", "VILLAGE", 
+                "WHISTLE", "YOGURT", "ZEBRA", "DOLPHIN", "BLOSSOM"
+            ];
+            
+            // Removed harder words arrays as requested - using just the base word list
+
+            // Game constants and variables
+            const GAME_TIME = 30;
+            let dailyWords = [], currentWordIndex = 0, currentWord = "", currentScrambled = "";
+            let score = 0, wordsSolved = 0, timeLeft = GAME_TIME, gameActive = false;
+            let today, timer;
+            
+            // Added streak and combo system (keeping as requested)
+            let streak = 0, currentStreak = 0, comboMultiplier = 1;
+            let lastSolveTime = 0;
+
+            // Cache DOM elements
+            const elements = {
+                startScreen: document.getElementById("start-screen"),
+                playedToday: document.getElementById("played-today"),
+                gamePlay: document.getElementById("game-play"),
+                gameOver: document.getElementById("game-over"),
+                startButton: document.getElementById("start-game"),
+                scrambledWord: document.getElementById("scrambled-word"),
+                userGuess: document.getElementById("user-guess"),
+                submitBtn: document.getElementById("submit-btn"),
+                skipBtn: document.getElementById("skip-btn"),
+                message: document.getElementById("message"),
+                score: document.getElementById("score"),
+                timer: document.getElementById("timer"),
+                timerProgress: document.getElementById("timer-progress"),
+                wordsSolved: document.getElementById("words-solved"),
+                countdown: document.getElementById("countdown"),
+                countdownEnd: document.getElementById("countdown-end"),
+                todayScore: document.getElementById("today-score"),
+                dailyDate: document.getElementById("daily-date"),
+                shareLink: document.getElementById("share-link"),
+                shareLinkPlayed: document.getElementById("share-link-played"),
+                twitterShare: document.getElementById("twitter-share"),
+                twitterSharePlayed: document.getElementById("twitter-share-played"),
+                streakDisplay: document.getElementById("streak-display"),
+                currentStreakDisplay: document.getElementById("current-streak-display"),
+                gameOverStreakDisplay: document.getElementById("game-over-streak-display"),
+                currentStreakDisplay: document.getElementById("current-streak-display"),
+                comboDisplay: document.getElementById("combo-display")
+            };
+
+            // Helper functions
+            function getCurrentDateCT() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
             }
-        }
 
-        function skipWord() {
-            if (!gameActive) return;
-            elements.userGuess.value = "";
-            currentWordIndex++;
-            getNextWord();
-        }
-
-        function updateTimer() {
-            elements.timer.textContent = `Time: ${timeLeft}s`;
-        }
-
-        function setupShareLink(elementId) {
-            const gameLink = window.location.href;
-            const currentDate = new Date();
-            const options = { weekday: 'long', month: 'short', day: 'numeric' };
-            const formattedDate = currentDate.toLocaleDateString('en-US', options);
-            const displayScore = elementId === "share-link" ? score : 
-                                (localStorage.getItem('lastScore') || "0");
-            const shareMessage = `Scrambl ${formattedDate}: ${displayScore} points. ${gameLink}`;
-            document.getElementById(elementId).href = `sms:?&body=${encodeURIComponent(shareMessage)}`;
-        }
-
-        function endGame() {
-            gameActive = false;
-            clearInterval(timer);
-            document.getElementById("final-score-display").textContent = `${wordsSolved} words | ${score} points`;
-            
-            setupShareLink("share-link");
-
-            // Track game completed
-            analytics.trackGameCompleted(score, wordsSolved);
-            
-            saveToday(score);
-            elements.gamePlay.style.display = "none";
-            elements.gameOver.style.display = "block";
-            updateCountdown();
-            setInterval(updateCountdown, 60000);
-        }
-
-        function startGame() {
-            if (hasPlayedToday()) return;
-            
-            // Reset game variables
-            currentWordIndex = 0;
-            score = 0;
-            wordsSolved = 0;
-            timeLeft = GAME_TIME;
-            gameActive = true;
-
-            elements.score.textContent = score;
-            elements.wordsSolved.textContent = wordsSolved;
-            updateTimer();
-
-            elements.startScreen.style.display = "none";
-            elements.gamePlay.style.display = "block";
-            elements.gameOver.style.display = "none";
-
-            getNextWord();
-
-            timer = setInterval(() => {
-                timeLeft--;
-                updateTimer();
-                if (timeLeft <= 0) endGame();
-            }, 1000);
-        }
-
-        function initGame() {
-            const timestamp = new Date().getTime();
-            today = getCurrentDateCT() + "?t=" + timestamp;
-            
-            const now = new Date();
-            const options = { weekday: 'long', month: 'short', day: 'numeric' };
-            elements.dailyDate.textContent = now.toLocaleDateString('en-US', options);
-
-            const lastPlayedDate = localStorage.getItem('lastPlayedDate');
-            if (lastPlayedDate && lastPlayedDate.split("?")[0] !== today.split("?")[0]) {
-                localStorage.removeItem('lastPlayedDate');
-                localStorage.removeItem('lastScore');
-                localStorage.removeItem('wordsSolved');
+            function getTimeUntilMidnightLocal() {
+                const now = new Date();
+                const midnight = new Date(now);
+                midnight.setHours(24, 0, 0, 0);
+                return midnight - now;
             }
 
-            dailyWords = getDailyWords(today.split("?")[0]);
-            
-            // Track page view
-            analytics.trackPageView();
+            function updateCountdown() {
+                const msLeft = getTimeUntilMidnightLocal();
+                const hoursLeft = Math.floor(msLeft / (1000 * 60 * 60));
+                const minutesLeft = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const countdownText = `Next: ${hoursLeft}h ${minutesLeft}m`;
+                elements.countdown.textContent = countdownText;
+                elements.countdownEnd.textContent = countdownText;
+                if (msLeft <= 0) window.location.reload();
+            }
 
-            if (hasPlayedToday()) {
+            function seededRandom(seed) {
+                let t = seed + 0x6D2B79F5;
+                t = Math.imul(t ^ t >>> 15, t | 1);
+                t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            }
+            
+            // Removed difficulty function - using all words
+
+            // Game functions
+            function getDailyWords(dateStr) {
+                let seed = 0;
+                for (let i = 0; i < dateStr.length; i++) seed += dateStr.charCodeAt(i);
+                
+                const shuffledWords = [...allWords];
+                
+                for (let i = shuffledWords.length - 1; i > 0; i--) {
+                    const j = Math.floor(seededRandom(seed + i) * (i + 1));
+                    [shuffledWords[i], shuffledWords[j]] = [shuffledWords[j], shuffledWords[i]];
+                }
+                return shuffledWords.slice(0, 30);
+            }
+
+            function scrambleWord(word, dateStr, wordIndex) {
+                const wordArray = word.split("");
+                let seed = 0;
+                for (let i = 0; i < dateStr.length; i++) seed += dateStr.charCodeAt(i);
+                seed += wordIndex * 100;
+
+                for (let i = wordArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(seededRandom(seed + i) * (i + 1));
+                    [wordArray[i], wordArray[j]] = [wordArray[j], wordArray[i]];
+                }
+
+                let scrambled = wordArray.join("");
+                if (scrambled === word && wordArray.length >= 2) {
+                    [wordArray[0], wordArray[1]] = [wordArray[1], wordArray[0]];
+                    scrambled = wordArray.join("");
+                }
+                return scrambled;
+            }
+
+            function hasPlayedToday() {
                 try {
-                    const lastScore = localStorage.getItem('lastScore') || "0";
-                    const lastWordsSolved = localStorage.getItem('wordsSolved') || "0";
-                    elements.todayScore.textContent = `${lastWordsSolved} words | ${lastScore} points`;
+                    const playedDate = localStorage.getItem('lastPlayedDate');
+                    if (!playedDate) return false;
+                    const playedDateClean = playedDate.split("?")[0];
+                    const todayClean = today.split("?")[0];
+                    return playedDateClean === todayClean;
+                } catch (error) {
+                    console.error("Local storage error:", error);
+                    return false;
+                }
+            }
+
+            function saveToday(finalScore) {
+                try {
+                    localStorage.setItem('lastPlayedDate', today);
+                    localStorage.setItem('lastScore', finalScore);
+                    localStorage.setItem('wordsSolved', wordsSolved);
                     
-                    setupShareLink("share-link-played");
+                    // Save streak
+                    if (finalScore > 0) {
+                        streak = (parseInt(localStorage.getItem('streak') || '0')) + 1;
+                        localStorage.setItem('streak', streak);
+                    } else {
+                        streak = 0;
+                        localStorage.setItem('streak', 0);
+                    }
+                    
+                    // Removed difficulty storage as requested
                 } catch (error) {
                     console.error("Local storage error:", error);
                 }
+            }
+
+            function getNextWord() {
+                if (currentWordIndex >= dailyWords.length) currentWordIndex = 0;
+                currentWord = dailyWords[currentWordIndex];
+                currentScrambled = scrambleWord(currentWord, today.split("?")[0], currentWordIndex);
+                elements.scrambledWord.textContent = currentScrambled;
+                
+                // Removed hint reset code
+                
+                // Add animation class for new word appearance
+                elements.scrambledWord.classList.add('new-word');
+                setTimeout(() => {
+                    elements.scrambledWord.classList.remove('new-word');
+                }, 600);
+                
+                elements.userGuess.value = "";
+                elements.message.textContent = "";
+                elements.message.className = "";
+                elements.userGuess.focus();
+            }
+
+            function checkAnswer() {
+                if (!gameActive) return;
+                const userGuess = elements.userGuess.value.trim().toUpperCase();
+
+                if (userGuess === currentWord) {
+                    elements.message.textContent = "Correct!";
+                    elements.message.className = "correct";
+                    
+                    // Calculate points with combo system
+                    const timeSinceLastSolve = lastSolveTime > 0 ? Date.now() - lastSolveTime : 0;
+                    lastSolveTime = Date.now();
+                    
+                    // Quick consecutive solves increase combo multiplier
+                    if (timeSinceLastSolve > 0 && timeSinceLastSolve < 5000) { // 5 seconds
+                        currentStreak++;
+                        if (currentStreak >= 3) {
+                            comboMultiplier = Math.min(3, 1 + Math.floor(currentStreak / 3)); // Max 3x multiplier
+                            
+                            // Show combo message
+                            elements.comboDisplay.textContent = `${comboMultiplier}x COMBO!`;
+                            elements.comboDisplay.classList.add('active');
+                            setTimeout(() => {
+                                elements.comboDisplay.classList.remove('active');
+                            }, 2000);
+                        }
+                    } else {
+                        currentStreak = 1;
+                        comboMultiplier = 1;
+                    }
+                    
+                    const basePoints = currentWord.length * 10;
+                    const points = basePoints * comboMultiplier;
+                    
+                    score += points;
+                    wordsSolved++;
+                    elements.score.textContent = score;
+                    elements.wordsSolved.textContent = wordsSolved;
+                    elements.userGuess.value = "";
+                    currentWordIndex++;
+                    
+                    getNextWord();
+                } else if (userGuess !== "") {
+                    elements.message.textContent = "Try again!";
+                    elements.message.className = "incorrect";
+                    currentStreak = 0;
+                    comboMultiplier = 1;
+                }
+            }
+
+            function skipWord() {
+                if (!gameActive) return;
+                elements.userGuess.value = "";
+                currentWordIndex++;
+                currentStreak = 0;
+                comboMultiplier = 1;
+                getNextWord();
+            }
+            
+            // Removed hint system function
+
+            function updateTimer() {
+                // Update text
+                elements.timer.textContent = `Time: ${timeLeft}s`;
+                
+                // Update progress bar
+                const percentage = (timeLeft / GAME_TIME) * 100;
+                elements.timerProgress.style.width = `${percentage}%`;
+                
+                // Add pulse animation when time is low
+                if (timeLeft <= 5) {
+                    elements.timer.classList.add('low');
+                } else {
+                    elements.timer.classList.remove('low');
+                }
+            }
+
+            function setupShareLink(elementId) {
+                const gameLink = window.location.href;
+                const currentDate = new Date();
+                const options = { weekday: 'long', month: 'short', day: 'numeric' };
+                const formattedDate = currentDate.toLocaleDateString('en-US', options);
+                const displayScore = elementId === "share-link" ? score : (localStorage.getItem('lastScore') || "0");
+                const shareMessage = `Scrambl ${formattedDate}: ${displayScore} points. ${gameLink}`;
+                
+                // SMS share
+                document.getElementById(elementId).href = `sms:?&body=${encodeURIComponent(shareMessage)}`;
+                
+                // Twitter share
+                const twitterId = elementId === "share-link" ? "twitter-share" : "twitter-share-played";
+                document.getElementById(twitterId).href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}`;
+            }
+
+            function updateStreakDisplay() {
+                try {
+                    const currentStreak = parseInt(localStorage.getItem('streak') || '0');
+                    if (currentStreak > 0) {
+                        elements.streakDisplay.textContent = `${currentStreak} day streak 🔥`;
+                        elements.currentStreakDisplay.textContent = `${currentStreak} day streak 🔥`;
+                        elements.gameOverStreakDisplay.textContent = `${currentStreak} day streak 🔥`;
+                    } else {
+                        elements.streakDisplay.textContent = '';
+                        elements.currentStreakDisplay.textContent = '';
+                        elements.gameOverStreakDisplay.textContent = '';
+                    }
+                } catch (error) {
+                    console.error("Streak display error:", error);
+                }
+            }
+
+            function endGame() {
+                gameActive = false;
+                cancelAnimationFrame(timer);
+                document.getElementById("final-score-display").textContent = `${wordsSolved} words | ${score} points`;
+                
+                setupShareLink("share-link");
+
+                // Track game completed
+                analytics.trackGameCompleted(score, wordsSolved, 'normal');
+                
+                saveToday(score);
+                elements.gamePlay.style.display = "none";
+                elements.gameOver.style.display = "block";
+                updateCountdown();
+                updateStreakDisplay();
+                setInterval(updateCountdown, 60000);
+            }
+            
+            function animateTimer() {
+                const now = Date.now();
+                const elapsed = (now - startTime) / 1000;
+                
+                if (elapsed >= 1) {
+                    timeLeft--;
+                    updateTimer();
+                    startTime = now;
+                    
+                    if (timeLeft <= 0) {
+                        endGame();
+                        return;
+                    }
+                }
+                
+                if (gameActive) {
+                    timer = requestAnimationFrame(animateTimer);
+                }
+            }
+            
+            let startTime;
+            
+            function startGame() {
+                if (hasPlayedToday()) return;
+                
+                // Reset game variables
+                currentWordIndex = 0;
+                score = 0;
+                wordsSolved = 0;
+                timeLeft = GAME_TIME;
+                gameActive = true;
+                currentStreak = 0;
+                comboMultiplier = 1;
+                lastSolveTime = 0;
+
+                elements.score.textContent = score;
+                elements.wordsSolved.textContent = wordsSolved;
+                updateTimer();
 
                 elements.startScreen.style.display = "none";
-                elements.playedToday.style.display = "block";
-                updateCountdown();
-                setInterval(updateCountdown, 60000);
-            } else {
-                elements.startScreen.style.display = "block";
-                elements.playedToday.style.display = "none";
+                elements.gamePlay.style.display = "block";
+                elements.gameOver.style.display = "none";
+
+                getNextWord();
+                
+                // Use requestAnimationFrame for better performance
+                startTime = Date.now();
+                timer = requestAnimationFrame(animateTimer);
             }
-        }
+            
+            // Removed difficulty setting function
 
-        // Event listeners
-        elements.startButton.addEventListener("click", startGame);
-        elements.submitBtn.addEventListener("click", checkAnswer);
-        elements.skipBtn.addEventListener("click", skipWord);
-        
-        // Share button tracking
-        elements.shareLink.addEventListener("click", function() {
-            analytics.trackShare("game_completed", score);
-        });
-        
-        elements.shareLinkPlayed.addEventListener("click", function() {
-            const lastScore = localStorage.getItem('lastScore') || "0";
-            analytics.trackShare("already_played", parseInt(lastScore));
-        });
+            function initGame() {
+                const timestamp = new Date().getTime();
+                today = getCurrentDateCT() + "?t=" + timestamp;
+                
+                const now = new Date();
+                const options = { weekday: 'long', month: 'short', day: 'numeric' };
+                elements.dailyDate.textContent = now.toLocaleDateString('en-US', options);
 
-        elements.userGuess.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") checkAnswer();
-        });
+                const lastPlayedDate = localStorage.getItem('lastPlayedDate');
+                if (lastPlayedDate && lastPlayedDate.split("?")[0] !== today.split("?")[0]) {
+                    localStorage.removeItem('lastPlayedDate');
+                    localStorage.removeItem('lastScore');
+                    localStorage.removeItem('wordsSolved');
+                }
+                
+                // Removed difficulty loading code
 
-        // Initialize game on page load
-        window.addEventListener("DOMContentLoaded", initGame);
+                dailyWords = getDailyWords(today.split("?")[0]);
+                
+                // Update streak display
+                updateStreakDisplay();
+                
+                // Track page view
+                analytics.trackPageView();
+
+                if (hasPlayedToday()) {
+                    try {
+                        const lastScore = localStorage.getItem('lastScore') || "0";
+                        const lastWordsSolved = localStorage.getItem('wordsSolved') || "0";
+                        elements.todayScore.textContent = `${lastWordsSolved} words | ${lastScore} points`;
+                        
+                        setupShareLink("share-link-played");
+                    } catch (error) {
+                        console.error("Local storage error:", error);
+                    }
+
+                    elements.startScreen.style.display = "none";
+                    elements.playedToday.style.display = "block";
+                    updateCountdown();
+                    setInterval(updateCountdown, 60000);
+                } else {
+                    elements.startScreen.style.display = "block";
+                    elements.playedToday.style.display = "none";
+                }
+            }
+
+            // Event listeners
+            elements.startButton.addEventListener("click", startGame);
+            elements.submitBtn.addEventListener("click", checkAnswer);
+            elements.skipBtn.addEventListener("click", skipWord);
+            // Removed hint and difficulty event listeners
+            
+            // Share button tracking
+            elements.shareLink.addEventListener("click", function() {
+                analytics.trackShare("game_completed", score, "sms");
+            });
+            
+            elements.shareLinkPlayed.addEventListener("click", function() {
+                const lastScore = localStorage.getItem('lastScore') || "0";
+                analytics.trackShare("already_played", parseInt(lastScore), "sms");
+            });
+            
+            elements.twitterShare.addEventListener("click", function() {
+                analytics.trackShare("game_completed", score, "twitter");
+            });
+            
+            elements.twitterSharePlayed.addEventListener("click", function() {
+                const lastScore = localStorage.getItem('lastScore') || "0";
+                analytics.trackShare("already_played", parseInt(lastScore), "twitter");
+            });
+
+            elements.userGuess.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") checkAnswer();
+            });
+            
+            // Add keyboard shortcuts for better accessibility
+            document.addEventListener("keydown", (e) => {
+                if (!gameActive) return;
+                
+                // Escape key to skip word
+                if (e.key === "Escape") {
+                    skipWord();
+                }
+                
+                // Removed hint keyboard shortcut
+            });
+
+            // Initialize game on page load
+            window.addEventListener("DOMContentLoaded", initGame);
+            
+            // Public API
+            return {
+                start: startGame
+            };
+        })();
     </script>
 </body>
 </html>

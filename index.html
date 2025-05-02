@@ -15,7 +15,14 @@
     <style>
         /* Base styles */
         body {font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif; max-width:600px; margin:0 auto; padding:20px; text-align:center; background-color:#121212; color:#f0f0f0; line-height:1.5;}
-        .game-container {background-color:#212121; border-radius:16px; padding:24px; box-shadow:0 8px 24px rgba(0,0,0,0.4); transition:all 0.3s ease;}
+        /* CHANGE 1: Add gradient background to the game container */
+        .game-container {
+            background: linear-gradient(145deg, #212121, #2d2d2d); 
+            border-radius:16px; 
+            padding:24px; 
+            box-shadow:0 8px 24px rgba(0,0,0,0.4); 
+            transition:all 0.3s ease;
+        }
         h1 {color:#fff; margin-bottom:10px; font-size:2.5em; letter-spacing:2px; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,0.2);}
         
         /* Input and buttons */
@@ -26,7 +33,24 @@
         .buttons {margin:24px 0;}
         
         /* Game elements */
-        .scrambled-word {font-size:2.4em; font-weight:bold; margin:28px 0; color:#4fc3f7; letter-spacing:8px; text-shadow:0 0 10px rgba(79,195,247,0.3);}
+        /* CHANGE 2: Improve scrambled word with letter-spacing, glowing effect and animation */
+        .scrambled-word {
+            font-size:2.4em; 
+            font-weight:bold; 
+            margin:28px 0; 
+            color:#4fc3f7; 
+            letter-spacing:12px; 
+            text-shadow:0 0 15px rgba(79,195,247,0.5);
+            animation: float 3s ease-in-out infinite;
+            padding: 10px;
+            background-color: rgba(33,33,33,0.5);
+            border-radius: 8px;
+        }
+        @keyframes float {
+            0% {transform: translateY(0px);}
+            50% {transform: translateY(-8px);}
+            100% {transform: translateY(0px);}
+        }
         #message {margin:20px 0; font-weight:bold; min-height:24px; transition:all 0.3s ease;}
         #message.correct {color:#4caf50; animation:pulse 0.5s;}
         #message.incorrect {color:#f44336;}
@@ -56,7 +80,7 @@
             body {padding:12px;}
             .game-container {padding:18px; border-radius:12px;}
             h1 {font-size:2.2em;}
-            .scrambled-word {font-size:2em; letter-spacing:6px;}
+            .scrambled-word {font-size:2em; letter-spacing:8px;}
             input {width:60%; padding:10px 14px;}
             button {padding:10px 16px;}
             .score-display {font-size:1.1em;}
@@ -143,27 +167,36 @@
 
         // Word list - simplified to array initialization
         const allWords = [
-            "CAT", "DOG", "PEN", "CUP", "HAT", "SUN", "RUN", "FUN", "CAR", "BOX", 
-            "DAY", "BED", "TOY", "BIG", "RED", "ONE", "TWO", "MAP", "JAM", "EGG", 
-            "BUS", "ANT", "APE", "ICE", "KEY", "MOM", "DAD", "TOP", "CAN", "LOG", 
-            "BAG", "PIG", "COW", "FOX", "OWL", "RAT", "BAT", "JUG", "ZIP", "NET", 
-            "MUD", "TUB", "PAW", "PIN", "JAR", "FAN", "TIE", "POT", "LID", "JOB",
-            "CAKE", "MILK", "BLUE", "BOOK", "FROG", "DUCK", "HAND", "FISH", "COIN", "BALL", 
-            "KITE", "SOAP", "ROAD", "BOAT", "DOOR", "LEAF", "GAME", "STAR", "LAMP", "SOCK", 
-            "BELT", "BIRD", "FOOD", "MOON", "RAIN", "WIND", "SEED", "DIRT", "HELP", "JUMP", 
-            "RICE", "SAND", "SWIM", "BABY", "TOYS", "BOWL", "RING", "BUGS", "HOME", "FLAG", 
-            "CAVE", "HILL", "LADY", "LOCK", "CORN", "SONG", "PLAY", "HERO", "PARK", "TIME",
-            "APPLE", "BREAD", "CHAIR", "DRINK", "HAPPY", "FLAME", "GRASS", "HOUSE", "PHOTO", "JUICE", 
-            "CANDY", "LEMON", "MOUSE", "PAPER", "OCEAN", "PHONE", "QUEEN", "RADIO", "SMILE", "TABLE", 
-            "UNCLE", "VIDEO", "WATER", "SUNNY", "ZEBRA", "BEACH", "CLOUD", "DANCE", "EARLY", "FRUIT", 
-            "GREEN", "HONEY", "HORSE", "JELLY", "MONEY", "LIGHT", "MOVIE", "PUPPY", "PIZZA", "PLANT", 
-            "QUIET", "ROCKS", "SLEEP", "TRUCK", "TIGER", "TRAIN", "WHALE", "WATCH", "SILLY", "LUCKY",
-            "ANIMAL", "BASKET", "COOKIE", "DINNER", "FAMILY", "FLOWER", "GUITAR", "HAMMER", "MONKEY", "JACKET", 
-            "KITTEN", "LITTLE", "MARKET", "FATHER", "ORANGE", "PEANUT", "ROCKET", "SISTER", "TIGERS", "TURTLE", 
-            "WINDOW", "YELLOW", "ZIPPER", "BUTTER", "COFFEE",
-            "BALLOON", "COMPUTER", "ELEPHANT", "DINOSAUR", "PLAYGROUND", "FOOTBALL", "SNOWBALL", "POPCORN", "BASEBALL", "RAINCOAT", 
-            "BIRTHDAY", "PANCAKES", "SANDWICH", "SUNSHINE", "SWIMMING", "CHOCOLATE", "LOLLIPOP", "SUPERMAN", "PRINCESS", "MOUNTAIN", 
-            "THURSDAY", "FAVORITE", "TEACHER", "BATHROOM", "BEDROOM"
+            // 50 three-letter words
+    "ACE", "APE", "ART", "BAG", "BAT", "BEE", "BOX", "BUG", "BUS", "CAP", 
+    "CAT", "COW", "CUP", "DAY", "DOG", "EAR", "EGG", "EYE", "FAN", "FIN", 
+    "FLY", "FOX", "FUN", "GEM", "HAT", "HEN", "ICE", "JAR", "JOY", "KEY", 
+    "KID", "LAW", "LEG", "LIP", "MAP", "MUD", "NET", "OWL", "PEN", "PIE", 
+    "PIN", "RAT", "RUG", "SKY", "SUN", "TOE", "TOP", "VAN", "WEB", "ZOO",
+    
+    // 50 four-letter words
+    "ABLE", "BABY", "BALL", "BEAR", "BELT", "BIKE", "BIRD", "BOAT", "BOOK", "BOWL", 
+    "CAKE", "CARD", "CASH", "CHEF", "COIN", "COOL", "DART", "DESK", "DISH", "DOOR", 
+    "DRUM", "DUCK", "FISH", "FLAG", "FROG", "GAME", "GIFT", "GOLD", "HAIR", "HAND", 
+    "HERO", "HOOK", "JUMP", "KITE", "LAMP", "LEAF", "MASK", "MOON", "NAIL", "PARK", 
+    "PLUG", "RAIN", "RING", "ROCK", "ROPE", "SHIP", "SHOE", "STAR", "TIRE", "TREE",
+    
+    // 50 five-letter words
+    "APPLE", "BEACH", "BREAD", "BRICK", "BRUSH", "CHAIR", "CHEESE", "CLOCK", "CLOUD", "DANCE", 
+    "DREAM", "DRESS", "DRINK", "EAGLE", "EARTH", "FLAME", "FLUTE", "GHOST", "GLOBE", "GLOVE", 
+    "GRAPE", "GREEN", "HOTEL", "HOUSE", "JEWEL", "KNIFE", "LEMON", "LIGHT", "MAGIC", "MEDAL", 
+    "MONEY", "MOUSE", "MUSIC", "OCEAN", "PAINT", "PAPER", "PHONE", "PIANO", "PLANT", "PLATE", 
+    "QUEEN", "RIVER", "ROBOT", "SMILE", "SNAKE", "SPACE", "SPOON", "STORM", "TIGER", "WATER",
+    
+    // 25 six-letter words
+    "BANANA", "BUTTON", "CAMERA", "COFFEE", "DRAGON", "FOREST", "GARDEN", "GUITAR", "ISLAND", "JACKET", 
+    "LADDER", "MARKET", "MONKEY", "ORANGE", "PENCIL", "POCKET", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
+    "TURTLE", "VELVET", "WALLET", "WINDOW", "WINTER",
+    
+    // 25 seven-letter words
+    "AIRPLANE", "BICYCLE", "CANDLE", "DIAMOND", "ELEPHANT", "FEATHER", "GATEWAY", "HORIZON", "JOURNEY", "KITCHEN", 
+    "LIBRARY", "MORNING", "NECKLACE", "OCTOPUS", "PENGUIN", "RAINBOW", "SHUTTLE", "TEAPOT", "UMBRELLA", "VILLAGE", 
+    "WHISTLE", "YOGURT", "ZEBRA", "DOLPHIN", "BLOSSOM"
         ];
 
         // Game constants and variables

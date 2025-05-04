@@ -15,13 +15,14 @@
     <style>
         /* Base styles */
         body {font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif; max-width:600px; margin:0 auto; padding:20px; text-align:center; background-color:#121212; color:#f0f0f0; line-height:1.5;}
-        /* CHANGE 1: Add gradient background to the game container */
+        /* Gradient background to the game container */
         .game-container {
             background: linear-gradient(145deg, #212121, #2d2d2d); 
             border-radius:16px; 
             padding:24px; 
             box-shadow:0 8px 24px rgba(0,0,0,0.4); 
             transition:all 0.3s ease;
+            position: relative; /* For positioning fixed elements */
         }
         h1 {color:#fff; margin-bottom:10px; font-size:2.5em; letter-spacing:2px; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,0.2);}
         
@@ -55,7 +56,7 @@
         .buttons {margin:24px 0;}
         
         /* Game elements */
-        /* CHANGE 2: Improve scrambled word with letter-spacing, glowing effect and animation */
+        /* Improve scrambled word with letter-spacing, glowing effect and animation */
         .scrambled-word {
             font-size:2.4em; 
             font-weight:bold; 
@@ -69,7 +70,7 @@
             border-radius: 8px;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        /* Add animation for new word appearance */
+        /* Animation for new word appearance */
         .scrambled-word.new-word {
             animation: newWord 0.6s ease-out;
         }
@@ -85,20 +86,33 @@
         #message {margin:20px 0; font-weight:bold; min-height:24px; transition:all 0.3s ease;}
         #message.correct {color:#4caf50; animation:pulse 0.5s;}
         #message.incorrect {color:#f44336; animation:shake 0.5s;}
-        /* Add shake animation for incorrect answers */
+        /* Shake animation for incorrect answers */
         @keyframes shake {
             0%, 100% {transform: translateX(0);}
             20%, 60% {transform: translateX(-5px);}
             40%, 80% {transform: translateX(5px);}
         }
         .score {margin-top:20px; font-weight:bold;}
-        .timer {font-size:1.3em; margin-bottom:15px; color:#f44336; font-weight:bold;}
-        /* Add pulse animation for timer when low */
+        
+        /* FIXED: Move timer to top of screen and make it fixed position on mobile */
+        .timer-container {
+            position: relative;
+            width: 100%;
+            z-index: 100;
+        }
+        .timer {
+            font-size:1.3em; 
+            margin-bottom:15px; 
+            color:#f44336; 
+            font-weight:bold;
+        }
+        /* Pulse animation for timer when low */
         .timer.low {animation: timerPulse 1s infinite;}
         @keyframes timerPulse {
             0%, 100% {opacity: 1;}
             50% {opacity: 0.7;}
         }
+        
         .game-over, .game-play, .played-today {display:none;}
         .game-over {font-size:1.5em; color:#e0e0e0; margin:20px 0;}
         .final-score {font-size:1.5em; color:#4caf50; margin:20px 0;}
@@ -119,13 +133,12 @@
             justify-content: space-around;
             flex-wrap: wrap;
         }
-        /* Add streak display */
+        /* Streak display */
         .streak-display {
             margin-top: 10px;
             font-size: 1.1em;
             color: #ffeb3b;
         }
-        /* Removed difficulty selector and hint system styles as requested */
         .share-score {
             display: flex;
             justify-content: center;
@@ -145,7 +158,7 @@
             transition:all 0.2s ease;
         }
         .share-score a:hover {background-color:#3d9a40; transform:translateY(-2px);}
-        /* Add share buttons for different platforms */
+        /* Share buttons for different platforms */
         .share-score .twitter-share {background-color:#1da1f2;}
         .share-score .twitter-share:hover {background-color:#0d8ecf;}
         
@@ -193,17 +206,39 @@
             100% {transform:scale(1);}
         }
         
-        /* Mobile responsiveness improvements */
+        /* FIXED: Mobile responsiveness improvements - especially for when keyboard is open */
         @media (max-width: 480px) {
             body {padding:12px;}
-            .game-container {padding:18px; border-radius:12px;}
+            .game-container {padding:18px 18px 90px; border-radius:12px;}
             h1 {font-size:2.2em;}
-            .scrambled-word {font-size:2em; letter-spacing:8px;}
+            .scrambled-word {font-size:2em; letter-spacing:8px; margin-top: 15px; margin-bottom: 15px;}
+            
+            /* FIXED: Create fixed header with timer that stays visible when keyboard appears */
+            .timer-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: #121212;
+                padding: 5px 10px;
+                z-index: 1000;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            /* Add padding at top to account for fixed timer */
+            .game-play {
+                padding-top: 60px;
+            }
+            
             .input-area {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 gap: 10px;
+                margin-bottom: 15px;
             }
             input {
                 width:90%; 
@@ -214,7 +249,37 @@
                 padding:10px 16px;
                 width: 80%;
             }
-            .score-display {font-size:1.1em;}
+            
+            /* FIXED: Make the skip button float at bottom */
+            .buttons {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: #212121;
+                padding: 10px;
+                margin: 0;
+                z-index: 100;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+            }
+            
+            /* FIXED: Make timer more visible */
+            .timer {
+                font-size: 1.5em;
+                padding: 8px;
+                margin: 0;
+            }
+            
+            /* FIXED: Make progress bar more visible */
+            .timer-progress-container {
+                height: 10px;
+                margin-bottom: 5px;
+                width: 90%;
+            }
+            
+            .score-display {
+                font-size:1.1em;
+            }
             .share-score {
                 flex-direction: column;
                 align-items: center;
@@ -233,9 +298,7 @@
             <p>solve the most words in 30 seconds</p>
             <p>10 points for each letter in a word</p>
             
-            <!-- Removed difficulty selector as requested -->
-            
-            <!-- Added streak display -->
+            <!-- Streak display -->
             <div class="streak-display" id="streak-display"></div>
             
             <p>share your score - leaderboard coming soon</p>
@@ -254,17 +317,20 @@
         </div>
 
         <div class="game-play" id="game-play">
-            <!-- Added timer progress bar -->
-            <div class="timer-progress-container">
-                <div class="timer-progress" id="timer-progress"></div>
+            <!-- FIXED: Moved timer to a container that will be fixed position on mobile -->
+            <div class="timer-container">
+                <div class="timer-progress-container">
+                    <div class="timer-progress" id="timer-progress"></div>
+                </div>
+                <div class="timer" id="timer">Time: 30s</div>
             </div>
-            <div class="timer" id="timer">Time: 30s</div>
+            
             <div class="score-display">
                 <div>Words: <span id="words-solved">0</span></div>
                 <div>Score: <span id="score">0</span></div>
             </div>
             
-            <!-- Added combo display -->
+            <!-- Combo display -->
             <div class="combo-display" id="combo-display"></div>
             
             <div class="scrambled-word" id="scrambled-word" aria-live="polite">RDOW</div>
@@ -276,11 +342,9 @@
             
             <div class="buttons">
                 <button id="skip-btn" aria-label="Skip this word">Skip</button>
-                <!-- Removed hint button as requested -->
             </div>
             
             <div id="message" aria-live="assertive"></div>
-            <!-- Removed hint display as requested -->
         </div>
 
         <div class="game-over" id="game-over">
@@ -325,8 +389,6 @@
                         'platform': platform
                     });
                 },
-                
-                    // Removed difficulty selection and hint usage tracking as requested
             };
 
             // Word list - simplified to array initialization
@@ -363,15 +425,13 @@
                 "WHISTLE", "YOGURT", "ZEBRA", "DOLPHIN", "BLOSSOM"
             ];
             
-            // Removed harder words arrays as requested - using just the base word list
-
             // Game constants and variables
             const GAME_TIME = 30;
             let dailyWords = [], currentWordIndex = 0, currentWord = "", currentScrambled = "";
             let score = 0, wordsSolved = 0, timeLeft = GAME_TIME, gameActive = false;
             let today, timer;
             
-            // Added streak and combo system (keeping as requested)
+            // Streak and combo system
             let streak = 0, currentStreak = 0, comboMultiplier = 1;
             let lastSolveTime = 0;
 
@@ -438,8 +498,6 @@
                 t ^= t + Math.imul(t ^ t >>> 7, t | 61);
                 return ((t ^ t >>> 14) >>> 0) / 4294967296;
             }
-            
-            // Removed difficulty function - using all words
 
             // Game functions
             function getDailyWords(dateStr) {
@@ -501,8 +559,6 @@
                         streak = 0;
                         localStorage.setItem('streak', 0);
                     }
-                    
-                    // Removed difficulty storage as requested
                 } catch (error) {
                     console.error("Local storage error:", error);
                 }
@@ -513,8 +569,6 @@
                 currentWord = dailyWords[currentWordIndex];
                 currentScrambled = scrambleWord(currentWord, today.split("?")[0], currentWordIndex);
                 elements.scrambledWord.textContent = currentScrambled;
-                
-                // Removed hint reset code
                 
                 // Add animation class for new word appearance
                 elements.scrambledWord.classList.add('new-word');
@@ -585,8 +639,6 @@
                 comboMultiplier = 1;
                 getNextWord();
             }
-            
-            // Removed hint system function
 
             function updateTimer() {
                 // Update text
@@ -704,8 +756,6 @@
                 startTime = Date.now();
                 timer = requestAnimationFrame(animateTimer);
             }
-            
-            // Removed difficulty setting function
 
             function initGame() {
                 const timestamp = new Date().getTime();
@@ -722,8 +772,6 @@
                     localStorage.removeItem('wordsSolved');
                 }
                 
-                // Removed difficulty loading code
-
                 dailyWords = getDailyWords(today.split("?")[0]);
                 
                 // Update streak display
@@ -757,7 +805,6 @@
             elements.startButton.addEventListener("click", startGame);
             elements.submitBtn.addEventListener("click", checkAnswer);
             elements.skipBtn.addEventListener("click", skipWord);
-            // Removed hint and difficulty event listeners
             
             // Share button tracking
             elements.shareLink.addEventListener("click", function() {
@@ -790,8 +837,6 @@
                 if (e.key === "Escape") {
                     skipWord();
                 }
-                
-                // Removed hint keyboard shortcut
             });
 
             // Initialize game on page load

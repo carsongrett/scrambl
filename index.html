@@ -491,9 +491,35 @@
         </div>
     </div>
 
-    <script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+        import { getDatabase, ref, set, onValue, push, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1sNTFNxF15_kIhxUplaq5EPasYOi_Bzs",
+            authDomain: "scrambl-1cc67.firebaseapp.com",
+            databaseURL: "https://scrambl-1cc67-default-rtdb.firebaseio.com",
+            projectId: "scrambl-1cc67",
+            storageBucket: "scrambl-1cc67.firebasestorage.app",
+            messagingSenderId: "589881408440",
+            appId: "1:589881408440:web:d8e3906bc040dd9a9bed4d",
+            measurementId: "G-XRCMRNC90E"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+        
         // Game module pattern
         const ScramblGame = (function() {
+            // Make Firebase services accessible in the game module
+            const firebaseDB = database;
+            
             // Analytics module
             const analytics = {
                 trackPageView: function() {
@@ -638,59 +664,52 @@
                 return ((t ^ t >>> 14) >>> 0) / 4294967296;
             }
             
-            // Leaderboard functions
+            // Firebase Leaderboard functions
+            function getLeaderboardRef() {
+                const dateKey = getCurrentDateCT().split("?")[0].replace(/-/g, "");
+                return ref(firebaseDB, `leaderboards/${dateKey}`);
+            }
+            
             function loadLeaderboard() {
-                try {
-                    const today = getCurrentDateCT().split("?")[0];
-                    const storedLeaderboard = localStorage.getItem(`leaderboard_${today}`);
-                    if (storedLeaderboard) {
-                        dailyLeaderboard = JSON.parse(storedLeaderboard);
-                    } else {
-                        dailyLeaderboard = [];
-                    }
-                } catch (error) {
-                    console.error("Error loading leaderboard:", error);
+                const leaderboardRef = getLeaderboardRef();
+                
+                // Set up real-time listener for leaderboard updates
+                onValue(leaderboardRef, (snapshot) => {
+                    // Get data from Firebase
+                    const data = snapshot.val();
+                    
+                    // Convert object to array for easier sorting
                     dailyLeaderboard = [];
-                }
+                    if (data) {
+                        Object.keys(data).forEach(key => {
+                            dailyLeaderboard.push({
+                                id: key,
+                                initials: data[key].initials,
+                                score: data[key].score,
+                                wordsSolved: data[key].wordsSolved,
+                                timestamp: data[key].timestamp
+                            });
+                        });
+                    }
+                    
+                    // Sort the leaderboard by score (highest first)
+                    dailyLeaderboard.sort((a, b) => b.score - a.score);
+                    
+                    // Update all leaderboard displays
+                    updateLeaderboardDisplay(elements.leaderboardEntries);
+                    updateLeaderboardDisplay(elements.gameOverLeaderboardEntries);
+                    updateLeaderboardDisplay(elements.playedTodayLeaderboardEntries);
+                });
             }
             
             function saveLeaderboard() {
+                // No need to modify localStorage logic as we'll keep it for backup
+                // and in case Firebase is unavailable
                 try {
                     const today = getCurrentDateCT().split("?")[0];
                     localStorage.setItem(`leaderboard_${today}`, JSON.stringify(dailyLeaderboard));
                 } catch (error) {
-                    console.error("Error saving leaderboard:", error);
-                }
-            }
-            
-            function updateLeaderboardDisplay(containerElement) {
-                if (!containerElement) return; // Skip if container element doesn't exist
-                
-                if (dailyLeaderboard.length === 0) {
-                    containerElement.innerHTML = `<div class="leaderboard-empty">Be the first to rank!</div>`;
-                    return;
-                }
-                
-                containerElement.innerHTML = "";
-                
-                // Sort by score (highest first)
-                const sortedLeaderboard = [...dailyLeaderboard].sort((a, b) => b.score - a.score);
-                
-                // Display top entries
-                const displayCount = Math.min(sortedLeaderboard.length, MAX_LEADERBOARD_ENTRIES);
-                for (let i = 0; i < displayCount; i++) {
-                    const entry = sortedLeaderboard[i];
-                    const isCurrentPlayer = entry.initials === playerInitials && 
-                                           entry.score === score && 
-                                           entry.timestamp === lastSolveTime;
-                    
-                    const entryDiv = document.createElement("div");
-                    entryDiv.className = `leaderboard-entry ${isCurrentPlayer ? "highlight" : ""}`;
-                    entryDiv.innerHTML = `
-                        <span><span class="rank">${i + 1}.</span> <span class="initials">${entry.initials}</span></span>
-                        <span class="score">${entry.score} pts</span>
-                    `;
-                    containerElement.appendChild(entryDiv);
+                    console.error("Error saving local leaderboard:", error);
                 }
             }
             
@@ -703,24 +722,60 @@
                 
                 playerInitials = initials;
                 
-                // Add new entry
-                dailyLeaderboard.push({
+                // Save score to Firebase
+                const leaderboardRef = getLeaderboardRef();
+                const newScoreRef = push(leaderboardRef);
+                
+                set(newScoreRef, {
                     initials: initials,
                     score: playerScore,
                     wordsSolved: wordsSolved,
                     timestamp: timestamp
+                })
+                .then(() => {
+                    console.log("Score saved to Firebase successfully");
+                })
+                .catch((error) => {
+                    console.error("Error saving score to Firebase:", error);
+                    
+                    // Fallback to localStorage if Firebase save fails
+                    dailyLeaderboard.push({
+                        initials: initials,
+                        score: playerScore,
+                        wordsSolved: wordsSolved,
+                        timestamp: timestamp
+                    });
+                    
+                    saveLeaderboard();
                 });
+            }
+            
+            function updateLeaderboardDisplay(containerElement) {
+                if (!containerElement) return; // Skip if container element doesn't exist
                 
-                // Sort and limit entries
-                dailyLeaderboard.sort((a, b) => b.score - a.score);
-                if (dailyLeaderboard.length > 10) { // Store top 10 but display top 3
-                    dailyLeaderboard = dailyLeaderboard.slice(0, 10);
+                if (dailyLeaderboard.length === 0) {
+                    containerElement.innerHTML = `<div class="leaderboard-empty">Be the first to rank!</div>`;
+                    return;
                 }
                 
-                saveLeaderboard();
-                updateLeaderboardDisplay(elements.leaderboardEntries);
-                updateLeaderboardDisplay(elements.gameOverLeaderboardEntries);
-                updateLeaderboardDisplay(elements.playedTodayLeaderboardEntries);
+                containerElement.innerHTML = "";
+                
+                // Display top entries
+                const displayCount = Math.min(dailyLeaderboard.length, MAX_LEADERBOARD_ENTRIES);
+                for (let i = 0; i < displayCount; i++) {
+                    const entry = dailyLeaderboard[i];
+                    const isCurrentPlayer = entry.initials === playerInitials && 
+                                           entry.score === score && 
+                                           entry.timestamp === lastSolveTime;
+                    
+                    const entryDiv = document.createElement("div");
+                    entryDiv.className = `leaderboard-entry ${isCurrentPlayer ? "highlight" : ""}`;
+                    entryDiv.innerHTML = `
+                        <span><span class="rank">${i + 1}.</span> <span class="initials">${entry.initials}</span></span>
+                        <span class="score">${entry.score} pts</span>
+                    `;
+                    containerElement.appendChild(entryDiv);
+                }
             }
 
             // Game functions
@@ -775,9 +830,6 @@
                     localStorage.setItem('lastScore', finalScore);
                     localStorage.setItem('wordsSolved', wordsSolved);
                     localStorage.setItem('lastInitials', playerInitials);
-                    
-                    // Save to leaderboard
-                    addScoreToLeaderboard(playerInitials, finalScore, Date.now());
                     
                     // Save streak
                     if (finalScore > 0) {
@@ -927,12 +979,16 @@
                 // Track game completed
                 analytics.trackGameCompleted(score, wordsSolved, 'normal');
                 
+                // Save score to Firebase and local storage
                 saveToday(score);
+                
+                // Add to leaderboard (which will handle adding to Firebase)
+                addScoreToLeaderboard(playerInitials, score, Date.now());
+                
                 elements.gamePlay.style.display = "none";
                 elements.gameOver.style.display = "block";
                 updateCountdown();
                 updateStreakDisplay();
-                updateLeaderboardDisplay(elements.gameOverLeaderboardEntries);
                 setInterval(updateCountdown, 60000);
             }
             
@@ -1011,11 +1067,8 @@
                 // Update streak display
                 updateStreakDisplay();
                 
-                // Load leaderboard
+                // Load leaderboard from Firebase
                 loadLeaderboard();
-                updateLeaderboardDisplay(elements.leaderboardEntries);
-                updateLeaderboardDisplay(elements.gameOverLeaderboardEntries);
-                updateLeaderboardDisplay(elements.playedTodayLeaderboardEntries);
                 
                 // Set previous initials if available
                 const lastInitials = localStorage.getItem('lastInitials');

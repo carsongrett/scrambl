@@ -213,24 +213,19 @@
             h1 {font-size:2.2em;}
             .scrambled-word {font-size:2em; letter-spacing:8px; margin-top: 15px; margin-bottom: 15px;}
             
-            /* FIXED: Create fixed header with timer that stays visible when keyboard appears */
+            /* FIXED: Position timer below the score so it's visible when keyboard is open */
             .timer-container {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                background: #121212;
-                padding: 5px 10px;
-                z-index: 1000;
+                position: relative;
+                margin-top: 10px;
+                padding: 5px;
+                z-index: 100;
+                background: rgba(33, 33, 33, 0.8);
+                border-radius: 12px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
             }
             
-            /* Add padding at top to account for fixed timer */
             .game-play {
-                padding-top: 60px;
+                padding-bottom: 70px;
             }
             
             .input-area {
@@ -317,17 +312,17 @@
         </div>
 
         <div class="game-play" id="game-play">
-            <!-- FIXED: Moved timer to a container that will be fixed position on mobile -->
+            <div class="score-display">
+                <div>Words: <span id="words-solved">0</span></div>
+                <div>Score: <span id="score">0</span></div>
+            </div>
+            
+            <!-- FIXED: Moved timer below score display for better visibility on mobile -->
             <div class="timer-container">
                 <div class="timer-progress-container">
                     <div class="timer-progress" id="timer-progress"></div>
                 </div>
                 <div class="timer" id="timer">Time: 30s</div>
-            </div>
-            
-            <div class="score-display">
-                <div>Words: <span id="words-solved">0</span></div>
-                <div>Score: <span id="score">0</span></div>
             </div>
             
             <!-- Combo display -->

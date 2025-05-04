@@ -156,6 +156,7 @@
             justify-content: center;
             gap: 15px;
             margin-top: 20px;
+            margin-bottom: 20px; /* Add margin to create space for leaderboard */
         }
         .share-score a {
             display:inline-block; 
@@ -427,6 +428,14 @@
                 <a id="share-link-played" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
                 <a id="twitter-share-played" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
             </div>
+            
+            <!-- Added leaderboard to played-today screen -->
+            <div class="leaderboard" id="played-today-leaderboard">
+                <h3>Today's Top Scores</h3>
+                <div class="leaderboard-entries" id="played-today-leaderboard-entries">
+                    <div class="leaderboard-empty">Be the first to rank!</div>
+                </div>
+            </div>
         </div>
 
         <div class="game-play" id="game-play">
@@ -463,6 +472,10 @@
         <div class="game-over" id="game-over">
             <p>Game Over</p>
             <div class="final-score" id="final-score-display"></div>
+            <div class="share-score">
+                <a id="share-link" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
+                <a id="twitter-share" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
+            </div>
             
             <!-- Added leaderboard to game over screen -->
             <div class="leaderboard" id="game-over-leaderboard">
@@ -474,10 +487,6 @@
             
             <!-- Added streak display to game over screen -->
             <div class="streak-display" id="game-over-streak-display"></div>
-            <div class="share-score">
-                <a id="share-link" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
-                <a id="twitter-share" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
-            </div>
             <div class="countdown" id="countdown-end"></div>
         </div>
     </div>
@@ -592,6 +601,7 @@
                 playerInitialsInput: document.getElementById("player-initials"),
                 leaderboardEntries: document.getElementById("leaderboard-entries"),
                 gameOverLeaderboardEntries: document.getElementById("game-over-leaderboard-entries"),
+                playedTodayLeaderboardEntries: document.getElementById("played-today-leaderboard-entries"),
                 comboDisplay: document.getElementById("combo-display")
             };
 
@@ -654,6 +664,8 @@
             }
             
             function updateLeaderboardDisplay(containerElement) {
+                if (!containerElement) return; // Skip if container element doesn't exist
+                
                 if (dailyLeaderboard.length === 0) {
                     containerElement.innerHTML = `<div class="leaderboard-empty">Be the first to rank!</div>`;
                     return;
@@ -708,6 +720,7 @@
                 saveLeaderboard();
                 updateLeaderboardDisplay(elements.leaderboardEntries);
                 updateLeaderboardDisplay(elements.gameOverLeaderboardEntries);
+                updateLeaderboardDisplay(elements.playedTodayLeaderboardEntries);
             }
 
             // Game functions
@@ -1002,6 +1015,7 @@
                 loadLeaderboard();
                 updateLeaderboardDisplay(elements.leaderboardEntries);
                 updateLeaderboardDisplay(elements.gameOverLeaderboardEntries);
+                updateLeaderboardDisplay(elements.playedTodayLeaderboardEntries);
                 
                 // Set previous initials if available
                 const lastInitials = localStorage.getItem('lastInitials');

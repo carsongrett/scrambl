@@ -41,7 +41,23 @@
             transition:all 0.3s ease;
             position: relative; /* For positioning fixed elements */
         }
-        h1 {color:var(--text-light); margin-bottom:10px; font-size:2.5em; letter-spacing:2px; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,0.2);}
+        
+        /* Logo styles */
+        .logo-container {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .game-logo {
+            max-width: 200px;
+            height: auto;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); /* Match your text shadow */
+            transition: transform 0.3s ease;
+        }
+        
+        .game-logo:hover {
+            transform: scale(1.03);
+        }
         
         /* Input and buttons */
         input {
@@ -318,7 +334,16 @@
         @media (max-width: 480px) {
             body {padding:12px;}
             .game-container {padding:18px; border-radius:12px;}
-            h1 {font-size:2.2em;}
+            
+            /* Mobile logo styling */
+            .logo-container {
+                margin-bottom: 10px;
+            }
+            
+            .game-logo {
+                max-width: 150px; /* Smaller on mobile */
+            }
+            
             .scrambled-word {font-size:2em; letter-spacing:8px; margin-top: 15px; margin-bottom: 15px;}
             
             /* FIXED: Position timer below the score so it's visible when keyboard is open */
@@ -358,64 +383,69 @@
             }
         }
             
-            .input-area {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-                margin-bottom: 15px;
-            }
-            input {
-                width:90%; 
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-            button {
-                padding:10px 16px;
-                width: 80%;
-            }
-            
-            /* FIXED: Make the skip button float at bottom */
-            .buttons {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: var(--primary-dark);
-                padding: 10px;
-                margin: 0;
-                z-index: 100;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-            }
-            
-            /* FIXED: Make timer more visible */
-            .timer {
-                font-size: 1.5em;
-                padding: 8px;
-                margin: 0;
-            }
-            
-            /* FIXED: Make progress bar more visible */
-            .timer-progress-container {
-                height: 10px;
-                margin-bottom: 5px;
-                width: 90%;
-            }
-            
-            .score-display {
-                font-size:1.1em;
-            }
-            .share-score {
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        input {
+            width:90%; 
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            padding:10px 16px;
+            width: 80%;
+        }
+        
+        /* FIXED: Make the skip button float at bottom */
+        .buttons {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--primary-dark);
+            padding: 10px;
+            margin: 0;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+        }
+        
+        /* FIXED: Make timer more visible */
+        .timer {
+            font-size: 1.5em;
+            padding: 8px;
+            margin: 0;
+        }
+        
+        /* FIXED: Make progress bar more visible */
+        .timer-progress-container {
+            height: 10px;
+            margin-bottom: 5px;
+            width: 90%;
+        }
+        
+        .score-display {
+            font-size:1.1em;
+        }
+        
+        .share-score {
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <h1>Scrambl</h1>
+        <!-- Replaced h1 with logo image -->
+        <div class="logo-container">
+            <img src="scrambl-logo.png" alt="Scrambl" class="game-logo">
+        </div>
         <div class="daily-date" id="daily-date"></div>
 
         <div class="start-screen" id="start-screen">

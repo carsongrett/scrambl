@@ -5,30 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scrambl</title>
     
-    <!-- Favicon Support - Regular browser behavior -->
+    <!-- Favicon Support -->
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     
-    <!-- Intentionally NOT using apple-mobile-web-app-capable -->
-    <!-- This ensures it opens in regular Safari -->
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L4YDGSZDV1"></script>
+    <!-- Google Analytics -->
     <script type="text/javascript">
+    (function() {
+        // Create and append the GA script
+        var gaScript = document.createElement('script');
+        gaScript.async = true;
+        gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-L4YDGSZDV1';
+        var firstScript = document.getElementsByTagName('script')[0];
+        firstScript ? firstScript.parentNode.insertBefore(gaScript, firstScript) : document.head.appendChild(gaScript);
+        
+        // Initialize GA
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-L4YDGSZDV1');
+    })();
     </script>
     
-    <!-- Rest of your styles and other head content -->
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-L4YDGSZDV1');
-    </script>
+    <!-- Your existing styles -->
     <style>
         /* Color variables */
         :root {
@@ -58,6 +59,8 @@
             transition:all 0.3s ease;
             position: relative; /* For positioning fixed elements */
         }
+        
+        /* The rest of your styles continue here */
         
         /* Logo styles */
         .logo-container {

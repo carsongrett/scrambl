@@ -11,28 +11,24 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     
-    <!-- Remove the web app capability -->
-    <!-- This ensures it opens in regular Safari with navigation -->
-    
-    <!-- Google Analytics - with fix for text display issue -->
+    <!-- Google Analytics -->
     <script>
-    // Wait for document to be fully loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        // Create and insert Google Analytics script
+    // Hide analytics code
+    (function() {
+        // Create script element for Google Analytics
         var gaScript = document.createElement('script');
-        gaScript.async = true;
         gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-L4YDGSZDV1';
+        gaScript.async = true;
         document.head.appendChild(gaScript);
         
-        // Setup Google Analytics
+        // Initialize Google Analytics
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-L4YDGSZDV1');
-    });
+    })();
     </script>
     
-    <!-- Your existing styles continue here -->
     <style>
         /* Color variables */
         :root {
@@ -62,8 +58,6 @@
             transition:all 0.3s ease;
             position: relative; /* For positioning fixed elements */
         }
-        
-        /* The rest of your styles continue here */
         
         /* Logo styles */
         .logo-container {
@@ -707,7 +701,7 @@
                 playerInitialsInput: document.getElementById("player-initials"),
                 leaderboardEntries: document.getElementById("leaderboard-entries"),
                 gameOverLeaderboardEntries: document.getElementById("game-over-leaderboard-entries"),
-                playedTodayLeaderboardEntries: document.getElementById("played-today-leaderboard-entries"),
+		playedTodayLeaderboardEntries: document.getElementById("played-today-leaderboard-entries"),
                 comboDisplay: document.getElementById("combo-display")
             };
 

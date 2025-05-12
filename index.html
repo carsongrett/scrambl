@@ -681,7 +681,7 @@
             // Word list - simplified to array initialization
             const allWords = [
                 // 50 three-letter words
-                "ACE", "BAG", "BEE", "BOX", "BUG", "BED", "CAP", "COW", "CUP", "EGG","EYE", "FAN", "FIN", "FLY", "FOX", "FUN", "GEM", "HEN", "ICE", "JOY", "KEY", 
+                "ACE", "BAG", "BEE", "BOX", "BUG", "BUS", "CAP", "COW", "CUP", "EGG","EYE", "FAN", "FIN", "FLY", "FOX", "FUN", "GEM", "HEN", "ICE", "JOY", "KEY", 
 "KID", "LEG", "LIP", "MUD", "OWL", "PEN", "PIE", 
 "RUG", "SKY", "SUN", "TOE", "VAN", "WEB", "ZOO",
 
@@ -996,6 +996,7 @@
                 const userGuess = elements.userGuess.value.trim().toUpperCase();
 
                 if (userGuess === currentWord) {
+                    updateWordStats(currentWord, true);
                     elements.message.textContent = "Correct!";
                     elements.message.className = "correct";
                     
@@ -1042,6 +1043,7 @@
 
             function skipWord() {
                 if (!gameActive) return;
+                updateWordStats(currentWord, false);
                 elements.userGuess.value = "";
                 currentWordIndex++;
                 currentStreak = 0;
@@ -1228,6 +1230,9 @@
                     elements.startScreen.style.display = "block";
                     elements.playedToday.style.display = "none";
                 }
+
+                // Load word stats
+                getMostStats();
             }
 
             // Event listeners
@@ -1276,6 +1281,48 @@
             // Initialize game on page load
             window.addEventListener("DOMContentLoaded", initGame);
             
+            // Add these functions after your existing Firebase functions
+            function updateWordStats(word, isSolved) {
+                const dateKey = getCurrentDateCT().split("?")[0].replace(/-/g, "");
+                const statsRef = ref(firebaseDB, `wordStats/${dateKey}/${word}`);
+                
+                onValue(statsRef, (snapshot) => {
+                    const data = snapshot.val() || { solved: 0, skipped: 0 };
+                    if (isSolved) {
+                        data.solved = (data.solved || 0) + 1;
+                    } else {
+                        data.skipped = (data.skipped || 0) + 1;
+                    }
+                    set(statsRef, data);
+                });
+            }
+            
+            function getMostStats() {
+                const dateKey = getCurrentDateCT().split("?")[0].replace(/-/g, "");
+                const statsRef = ref(firebaseDB, `wordStats/${dateKey}`);
+                
+                onValue(statsRef, (snapshot) => {
+                    const stats = snapshot.val() || {};
+                    let mostSolved = { word: '-', count: 0 };
+                    let mostSkipped = { word: '-', count: 0 };
+                    
+                    Object.entries(stats).forEach(([word, data]) => {
+                        if (data.solved > mostSolved.count) {
+                            mostSolved = { word, count: data.solved };
+                        }
+                        if (data.skipped > mostSkipped.count) {
+                            mostSkipped = { word, count: data.skipped };
+                        }
+                    });
+                    
+                    // Update both game over and played today displays
+                    document.getElementById('most-solved-word').textContent = mostSolved.word;
+                    document.getElementById('most-skipped-word').textContent = mostSkipped.word;
+                    document.getElementById('most-solved-word-played').textContent = mostSolved.word;
+                    document.getElementById('most-skipped-word-played').textContent = mostSkipped.word;
+                });
+            }
+
             // Public API
             return {
                 start: startGame

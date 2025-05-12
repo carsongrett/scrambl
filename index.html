@@ -458,6 +458,7 @@
             flex-direction: column;
             align-items: center;
             gap: 10px;
+
         }
     </style>
 </head>
@@ -494,23 +495,25 @@
         </div>
 
         <div class="played-today" id="played-today">
-            <p>Already played today.</p>
-            <div class="final-score">Score: <span id="today-score">0</span></div>
-            <div class="streak-display" id="current-streak-display"></div>
-            <div class="countdown" id="countdown"></div>
-            <div class="share-score">
-                <a id="share-link-played" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
-                <a id="twitter-share-played" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
-            </div>
-            
-            <!-- Added leaderboard to played-today screen -->
-            <div class="leaderboard" id="played-today-leaderboard">
-                <h3>today's top scores</h3>
-                <div class="leaderboard-entries" id="played-today-leaderboard-entries">
-                    <div class="leaderboard-empty">Be the first to rank!</div>
-                </div>
-            </div>
+    <p>Already played today.</p>
+    <div class="final-score">Score: <span id="today-score">0</span></div>
+    <div class="streak-display" id="current-streak-display"></div>
+    <div class="countdown" id="countdown"></div>
+    
+    <!-- Added leaderboard to played-today screen - MOVED ABOVE SHARE BUTTONS -->
+    <div class="leaderboard" id="played-today-leaderboard">
+        <h3>today's top scores</h3>
+        <div class="leaderboard-entries" id="played-today-leaderboard-entries">
+            <div class="leaderboard-empty">Be the first to rank!</div>
         </div>
+    </div>
+    
+    <!-- Share buttons now below leaderboard -->
+    <div class="share-score">
+        <a id="share-link-played" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
+        <a id="twitter-share-played" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
+    </div>
+</div>
 
         <div class="game-play" id="game-play">
             <div class="score-display">
@@ -544,26 +547,27 @@
         </div>
 
         <div class="game-over" id="game-over">
-            <p>Game Over</p>
-            <div class="final-score" id="final-score-display"></div>
-            <div class="share-score">
-                <a id="share-link" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
-                <a id="twitter-share" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
-            </div>
-            
-            <!-- Added leaderboard to game over screen -->
-            <div class="leaderboard" id="game-over-leaderboard">
-                <h3>today's top scores</h3>
-                <div class="leaderboard-entries" id="game-over-leaderboard-entries">
-                    <div class="leaderboard-empty">Be the first to rank!</div>
-                </div>
-            </div>
-            
-            <!-- Added streak display to game over screen -->
-            <div class="streak-display" id="game-over-streak-display"></div>
-            <div class="countdown" id="countdown-end"></div>
+    <p>Game Over</p>
+    <div class="final-score" id="final-score-display"></div>
+    
+    <!-- Added leaderboard to game over screen - MOVED ABOVE SHARE BUTTONS -->
+    <div class="leaderboard" id="game-over-leaderboard">
+        <h3>today's top scores</h3>
+        <div class="leaderboard-entries" id="game-over-leaderboard-entries">
+            <div class="leaderboard-empty">Be the first to rank!</div>
         </div>
     </div>
+    
+    <!-- Share buttons now below leaderboard -->
+    <div class="share-score">
+        <a id="share-link" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
+        <a id="twitter-share" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
+    </div>
+    
+    <!-- Added streak display to game over screen -->
+    <div class="streak-display" id="game-over-streak-display"></div>
+    <div class="countdown" id="countdown-end"></div>
+</div>
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -724,7 +728,7 @@
                 const msLeft = getTimeUntilMidnightLocal();
                 const hoursLeft = Math.floor(msLeft / (1000 * 60 * 60));
                 const minutesLeft = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const countdownText = `Next: ${hoursLeft}h ${minutesLeft}m`;
+                const countdownText = `Next game: ${hoursLeft}h ${minutesLeft}m`;
                 elements.countdown.textContent = countdownText;
                 elements.countdownEnd.textContent = countdownText;
                 if (msLeft <= 0) window.location.reload();

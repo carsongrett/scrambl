@@ -823,13 +823,16 @@
                         showMessage("reCAPTCHA not initialized. Please reload the page.", "incorrect");
                         return;
                     }
+                    console.log('About to call signInWithPhoneNumber');
                     const confirmationResult = await signInWithPhoneNumber(firebaseAuth, formattedPhone, recaptchaVerifier);
+                    console.log('signInWithPhoneNumber resolved', confirmationResult);
                     window.confirmationResult = confirmationResult;
                     
                     // Show verification code input
                     elements.phoneInputContainer.style.display = 'none';
                     elements.verificationContainer.style.display = 'block';
                     showMessage("Verification code sent!", "correct");
+                    console.log('UI updated to show verification code input');
                 } catch (error) {
                     console.error("Error sending verification code:", error);
                     showMessage("Error sending verification code: " + error.message, "incorrect");

@@ -800,6 +800,7 @@
                         }
                     });
                     recaptchaVerifier.render(); // Ensure reCAPTCHA is rendered
+                    window.recaptchaVerifier = recaptchaVerifier; // Expose globally for debugging
                 }
             }
             

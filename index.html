@@ -945,6 +945,12 @@
             elements.playerUsernameInput.addEventListener("input", function() {
                 this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '');
             });
+            // Enable the verify button when phone number is valid
+            elements.playerPhoneInput.addEventListener('input', function() {
+                const phone = this.value.replace(/[^0-9]/g, '');
+                this.value = phone;
+                elements.verifyPhoneBtn.disabled = phone.length !== 10;
+            });
             
             // Initialize game
             function initGame() {

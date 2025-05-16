@@ -968,6 +968,7 @@
             
             // Initialize game
             function initGame() {
+                initRecaptcha(); // Ensure reCAPTCHA is initialized on page load
                 const timestamp = new Date().getTime();
                 today = getCurrentDateCT() + "?t=" + timestamp;
                 
@@ -1023,9 +1024,6 @@
 
                 // Load word stats
                 getMostStats();
-                
-                // Initialize reCAPTCHA
-                initRecaptcha();
                 
                 // Check for existing user session
                 firebaseAuth.onAuthStateChanged(async (user) => {

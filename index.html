@@ -814,6 +814,15 @@
                 
                 try {
                     const formattedPhone = `+1${phoneNumber}`; // Assuming US numbers
+                    console.log('formattedPhone:', formattedPhone);
+                    console.log('recaptchaVerifier:', recaptchaVerifier);
+                    if (recaptchaVerifier) {
+                        await recaptchaVerifier.render();
+                        console.log('recaptchaVerifier rendered');
+                    } else {
+                        showMessage("reCAPTCHA not initialized. Please reload the page.", "incorrect");
+                        return;
+                    }
                     const confirmationResult = await signInWithPhoneNumber(firebaseAuth, formattedPhone, recaptchaVerifier);
                     window.confirmationResult = confirmationResult;
                     
@@ -823,7 +832,7 @@
                     showMessage("Verification code sent!", "correct");
                 } catch (error) {
                     console.error("Error sending verification code:", error);
-                    showMessage("Error sending verification code. Please try again.", "incorrect");
+                    showMessage("Error sending verification code: " + error.message, "incorrect");
                 }
             }
             

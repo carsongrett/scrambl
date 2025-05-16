@@ -787,20 +787,20 @@
             // Initialize reCAPTCHA
             let recaptchaVerifier;
             function initRecaptcha() {
-                recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', {
-                    'size': 'invisible',
-                    'callback': (response) => {
-                        // reCAPTCHA solved, enable phone verification
-                        elements.verifyPhoneBtn.disabled = false;
-                    },
-                    'expired-callback': () => {
-                        // Reset reCAPTCHA when expired
-                        elements.verifyPhoneBtn.disabled = true;
-                        recaptchaVerifier.clear();
-                        initRecaptcha();
-                    }
-                });
-                recaptchaVerifier.render(); // Ensure reCAPTCHA is rendered
+                if (!recaptchaVerifier) {
+                    recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', {
+                        'size': 'invisible',
+                        'callback': (response) => {
+                            // reCAPTCHA solved, enable phone verification
+                            elements.verifyPhoneBtn.disabled = false;
+                        },
+                        'expired-callback': () => {
+                            elements.verifyPhoneBtn.disabled = true;
+                            showMessage('reCAPTCHA expired. Please reload the page.', 'incorrect');
+                        }
+                    });
+                    recaptchaVerifier.render(); // Ensure reCAPTCHA is rendered
+                }
             }
             
             // Phone verification functions

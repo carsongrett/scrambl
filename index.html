@@ -488,6 +488,74 @@
         .stat-value {
             color: var(--accent-peach);
         }
+        
+        /* Add these styles to your existing CSS */
+        .verification-step {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .verification-step input {
+            width: 90%;
+            text-align: center;
+            font-size: 1.1em;
+            padding: 12px;
+            border: 2px solid var(--accent-main);
+            border-radius: 12px;
+            background-color: var(--primary-light);
+            color: var(--text-dark);
+        }
+        
+        .verification-step input:focus {
+            outline: none;
+            border-color: var(--accent-peach);
+            box-shadow: 0 0 0 3px rgba(255, 219, 181, 0.3);
+        }
+        
+        .verify-btn {
+            width: auto !important;
+            padding: 10px 20px;
+            background-color: var(--accent-main);
+            color: var(--text-dark);
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .verify-btn:disabled {
+            background-color: var(--primary-light);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .verify-btn:hover:not(:disabled) {
+            background-color: #70c9b4;
+            transform: translateY(-2px);
+        }
+        
+        #recaptcha-container {
+            margin: 10px 0;
+        }
+        
+        /* Mobile responsiveness for verification steps */
+        @media (max-width: 480px) {
+            .verification-step input {
+                width: 95%;
+                font-size: 1em;
+                padding: 10px;
+            }
+            
+            .verify-btn {
+                width: 95% !important;
+                font-size: 1em;
+                padding: 8px 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -503,9 +571,23 @@
             <p>solve the most words in 30 seconds</p>
             <p>10 points for each letter in a word</p>
             
-            <!-- Added initials input -->
-            <div class="initials-input">
-                <input type="text" id="player-initials" placeholder="Initials" maxlength="3" autocomplete="off">
+            <!-- Phone verification container -->
+            <div id="phone-input-container" class="verification-step">
+                <input type="tel" id="player-phone" placeholder="Enter your phone number" maxlength="10" pattern="[0-9]{10}">
+                <div id="recaptcha-container"></div>
+                <button id="verify-phone" class="verify-btn" disabled>Send Verification Code</button>
+            </div>
+            
+            <!-- Verification code container -->
+            <div id="verification-container" class="verification-step" style="display: none;">
+                <input type="text" id="verification-code" placeholder="Enter 6-digit code" maxlength="6" pattern="[0-9]{6}">
+                <button id="submit-verification" class="verify-btn">Verify Code</button>
+            </div>
+            
+            <!-- Username container -->
+            <div id="username-container" class="verification-step" style="display: none;">
+                <input type="text" id="player-username" placeholder="Choose a username (3-15 characters)" maxlength="15" autocomplete="off">
+                <button id="set-username" class="verify-btn">Set Username</button>
             </div>
             
             <!-- Leaderboard display -->
@@ -519,7 +601,7 @@
             <!-- Streak display -->
             <div class="streak-display" id="streak-display"></div>
             
-            <button id="start-game" role="button" aria-label="Start game">Play</button>
+            <button id="start-game" role="button" aria-label="Start game" disabled>Play</button>
         </div>
 
         <div class="played-today" id="played-today">
@@ -627,6 +709,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getDatabase, ref, set, onValue, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -644,88 +727,21 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
+        const auth = getAuth(app);
         
         // Game module pattern
         const ScramblGame = (function() {
             // Make Firebase services accessible in the game module
             const firebaseDB = database;
+            const firebaseAuth = auth;
             
-            // Analytics module
-            const analytics = {
-                trackPageView: function() {
-                    gtag('event', 'Scrambl_Page_Visit', {
-                        'page_title': 'Scrambl Word Game',
-                        'page_location': window.location.href
-                    });
-                },
-                
-                trackGameCompleted: function(score, wordsSolved, difficulty) {
-                    gtag('event', 'Scrambl_Game_Completed', {
-                        'event_category': 'Game Actions',
-                        'score': score,
-                        'words_solved': wordsSolved,
-                        'difficulty': difficulty
-                    });
-                },
-                
-                trackShare: function(context, score, platform) {
-                    gtag('event', 'Scrambl_Score_Shared', {
-                        'event_category': 'Game Actions',
-                        'share_context': context,
-                        'score': score,
-                        'platform': platform
-                    });
-                },
+            // Add new variables for user profile
+            let userProfile = {
+                phoneNumber: null,
+                username: null,
+                verified: false
             };
-
-            // Word list - simplified to array initialization
-            const allWords = [
-                // 50 three-letter words
-                "ACE", "BAG", "BEE", "BOX", "BUG", "FUN", "PEN", "COW", "CUP", "EGG","EYE", "FAN", "FIN", "FLY", "FOX", "FUN", "GEM", "HEN", "YAK", "JOY", "KEY", 
-"KID", "HAT", "LIP", "MUD", "DOG", "PEN", "PIE", 
-"RUG", "SKY", "SUN", "TOE", "VAN", "WEB", "ZOO",
-
-                
-                // 50 four-letter words
-                "ABLE", "BABY", "BALL", "BEAR", "BELT", "BIKE", "BIRD", "BOAT", "BOOK", "BOWL", "CAKE", "CARD", "CASH", "CHEF", "COIN", "COOL", "DART", "DESK", "DISH", "DOOR", 
-"DRUM", "DUCK", "FISH", "FLAG", "FROG", "GAME", "GIFT", "GOLD", "HAIR", "HAND", 
-"HERO", "HOOK", "JUMP", "KITE", "LAMP", "LEAF", "THAT", "MOON", "NAIL", "PARK", 
-"PLUG", "RAIN", "RING", "ROCK", "ROPE", "SHIP", "GOOD", "TIRE", "TREE",
-
-                
-                // 50 five-letter words
-                "APPLE", "BEACH", "BREAD", "BRICK", "BRUSH", "CHAIR", "CHEESE", "CLOCK", "CLOUD", "DANCE", 
-"DREAM", "DRESS", "DRINK", "EAGLE", "EARTH", "FLAME", "FLUTE", "GHOST", "GLOBE", "GLOVE", 
-"GRAPE", "GREEN", "HOTEL", "HOUSE", "JEWEL", "KNIFE", "LEMON", "LIGHT", "MAGIC", "MEDAL", 
-"MONEY", "MOUSE", "MUSIC", "OCEAN", "PAINT", "PAPER", "PHONE", "PIANO", "PLANT", "PLATE", 
-"QUEEN", "RIVER", "DRUGS", "SNAKE", "SPACE", "SPOON", "STORM", "TIGER", "WATER",
-                
-                // 25 six-letter words
-                "ACROSS", "CUSTOM", "CAMERA", "ALMOND", "DRAGON", "FOREST", "JUMPER", "GUITAR", "ISLAND", "JACKET", 
-                "LADDER", "MARKET", "YELLOW", "ORANGE", "NARROW", "HEIGHT", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
-                "TURTLE", "VELVET", "DEFEND", "WINDOW", "WINTER",
-                
-                // 25 seven-letter words
-                "BANANA", "BUTTON", "UNCOVER", "JOURNEY", "DRAGON", "FOREST", "DIAMOND", "TWITTER", "ISLAND", "JACKET", 
-"ANALOGY", "MARKET", "QUARTER", "ORANGE", "FACTORY", "GIRAFFE", "ROCKET", "SANDWICH", "HAMSTER", "MISSION", 
-"VINTAGE", "VELVET", "LANTERN", "TEXTURE", "WINTER"
-            ];
             
-            // Game constants and variables
-            const GAME_TIME = 30;
-            let dailyWords = [], currentWordIndex = 0, currentWord = "", currentScrambled = "";
-            let score = 0, wordsSolved = 0, timeLeft = GAME_TIME, gameActive = false;
-            let today, timer;
-            
-            // Streak and combo system
-            let streak = 0, currentStreak = 0, comboMultiplier = 1;
-            let lastSolveTime = 0;
-            
-            // New variables for leaderboard functionality
-            let playerInitials = "";
-            let dailyLeaderboard = [];
-            const MAX_LEADERBOARD_ENTRIES = 3;
-
             // Cache DOM elements
             const elements = {
                 startScreen: document.getElementById("start-screen"),
@@ -757,396 +773,146 @@
                 leaderboardEntries: document.getElementById("leaderboard-entries"),
                 gameOverLeaderboardEntries: document.getElementById("game-over-leaderboard-entries"),
 		playedTodayLeaderboardEntries: document.getElementById("played-today-leaderboard-entries"),
-                comboDisplay: document.getElementById("combo-display")
+                comboDisplay: document.getElementById("combo-display"),
+                playerPhoneInput: document.getElementById("player-phone"),
+                verifyPhoneBtn: document.getElementById("verify-phone"),
+                verificationCodeInput: document.getElementById("verification-code"),
+                submitVerificationBtn: document.getElementById("submit-verification"),
+                playerUsernameInput: document.getElementById("player-username"),
+                verificationContainer: document.getElementById("verification-container"),
+                phoneInputContainer: document.getElementById("phone-input-container"),
+                usernameContainer: document.getElementById("username-container")
             };
-
-            // Helper functions
-            function getCurrentDateCT() {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            }
-
-            function getTimeUntilMidnightLocal() {
-                const now = new Date();
-                const midnight = new Date(now);
-                midnight.setHours(24, 0, 0, 0);
-                return midnight - now;
-            }
-
-            function updateCountdown() {
-                const msLeft = getTimeUntilMidnightLocal();
-                const hoursLeft = Math.floor(msLeft / (1000 * 60 * 60));
-                const minutesLeft = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const countdownText = `Next game: ${hoursLeft}h ${minutesLeft}m`;
-                elements.countdown.textContent = countdownText;
-                elements.countdownEnd.textContent = countdownText;
-                if (msLeft <= 0) window.location.reload();
-            }
-
-            function seededRandom(seed) {
-                let t = seed + 0x6D2B79F5;
-                t = Math.imul(t ^ t >>> 15, t | 1);
-                t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-                return ((t ^ t >>> 14) >>> 0) / 4294967296;
-            }
             
-            // Firebase Leaderboard functions
-            function getLeaderboardRef() {
-                const dateKey = getCurrentDateCT().split("?")[0].replace(/-/g, "");
-                return ref(firebaseDB, `leaderboards/${dateKey}`);
-            }
-            
-            function loadLeaderboard() {
-                const leaderboardRef = getLeaderboardRef();
-                
-                // Set up real-time listener for leaderboard updates
-                onValue(leaderboardRef, (snapshot) => {
-                    // Get data from Firebase
-                    const data = snapshot.val();
-                    
-                    // Convert object to array for easier sorting
-                    dailyLeaderboard = [];
-                    if (data) {
-                        Object.keys(data).forEach(key => {
-                            dailyLeaderboard.push({
-                                id: key,
-                                initials: data[key].initials,
-                                score: data[key].score,
-                                wordsSolved: data[key].wordsSolved,
-                                timestamp: data[key].timestamp
-                            });
-                        });
+            // Initialize reCAPTCHA
+            let recaptchaVerifier;
+            function initRecaptcha() {
+                recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': (response) => {
+                        // reCAPTCHA solved, enable phone verification
+                        elements.verifyPhoneBtn.disabled = false;
+                    },
+                    'expired-callback': () => {
+                        // Reset reCAPTCHA when expired
+                        elements.verifyPhoneBtn.disabled = true;
+                        recaptchaVerifier.clear();
+                        initRecaptcha();
                     }
-                    
-                    // Sort the leaderboard by score (highest first)
-                    dailyLeaderboard.sort((a, b) => b.score - a.score);
-                    
-                    // Update all leaderboard displays
-                    updateLeaderboardDisplay(elements.leaderboardEntries);
-                    updateLeaderboardDisplay(elements.gameOverLeaderboardEntries);
-                    updateLeaderboardDisplay(elements.playedTodayLeaderboardEntries);
                 });
             }
             
-            function saveLeaderboard() {
-                // No need to modify localStorage logic as we'll keep it for backup
-                // and in case Firebase is unavailable
-                try {
-                    const today = getCurrentDateCT().split("?")[0];
-                    localStorage.setItem(`leaderboard_${today}`, JSON.stringify(dailyLeaderboard));
-                } catch (error) {
-                    console.error("Error saving local leaderboard:", error);
-                }
-            }
-            
-            function addScoreToLeaderboard(initials, playerScore, timestamp) {
-                if (!initials || initials.trim() === "") {
-                    initials = "???";
-                } else {
-                    initials = initials.trim().toUpperCase().substring(0, 3);
-                }
-                
-                playerInitials = initials;
-                
-                // Save score to Firebase
-                const leaderboardRef = getLeaderboardRef();
-                const newScoreRef = push(leaderboardRef);
-                
-                set(newScoreRef, {
-                    initials: initials,
-                    score: playerScore,
-                    wordsSolved: wordsSolved,
-                    timestamp: timestamp
-                })
-                .then(() => {
-                    console.log("Score saved to Firebase successfully");
-                })
-                .catch((error) => {
-                    console.error("Error saving score to Firebase:", error);
-                    
-                    // Fallback to localStorage if Firebase save fails
-                    dailyLeaderboard.push({
-                        initials: initials,
-                        score: playerScore,
-                        wordsSolved: wordsSolved,
-                        timestamp: timestamp
-                    });
-                    
-                    saveLeaderboard();
-                });
-            }
-            
-            function updateLeaderboardDisplay(containerElement) {
-                if (!containerElement) return; // Skip if container element doesn't exist
-                
-                if (dailyLeaderboard.length === 0) {
-                    containerElement.innerHTML = `<div class="leaderboard-empty">Be the first to rank!</div>`;
+            // Phone verification functions
+            async function sendVerificationCode() {
+                const phoneNumber = elements.playerPhoneInput.value;
+                if (!phoneNumber || phoneNumber.length !== 10) {
+                    showMessage("Please enter a valid 10-digit phone number", "incorrect");
                     return;
                 }
                 
-                containerElement.innerHTML = "";
-                
-                // Display top entries
-                const displayCount = Math.min(dailyLeaderboard.length, MAX_LEADERBOARD_ENTRIES);
-                for (let i = 0; i < displayCount; i++) {
-                    const entry = dailyLeaderboard[i];
-                    const isCurrentPlayer = entry.initials === playerInitials && 
-                                           entry.score === score && 
-                                           entry.timestamp === lastSolveTime;
-                    
-                    const entryDiv = document.createElement("div");
-                    entryDiv.className = `leaderboard-entry ${isCurrentPlayer ? "highlight" : ""}`;
-                    entryDiv.innerHTML = `
-                        <span><span class="rank">${i + 1}.</span> <span class="initials">${entry.initials}</span></span>
-                        <span class="score">${entry.score} pts</span>
-                    `;
-                    containerElement.appendChild(entryDiv);
-                }
-            }
-
-            // Game functions
-            function getDailyWords(dateStr) {
-                let seed = 0;
-                for (let i = 0; i < dateStr.length; i++) seed += dateStr.charCodeAt(i);
-                
-                const shuffledWords = [...allWords];
-                
-                for (let i = shuffledWords.length - 1; i > 0; i--) {
-                    const j = Math.floor(seededRandom(seed + i) * (i + 1));
-                    [shuffledWords[i], shuffledWords[j]] = [shuffledWords[j], shuffledWords[i]];
-                }
-                return shuffledWords.slice(0, 30);
-            }
-
-            function scrambleWord(word, dateStr, wordIndex) {
-                const wordArray = word.split("");
-                let seed = 0;
-                for (let i = 0; i < dateStr.length; i++) seed += dateStr.charCodeAt(i);
-                seed += wordIndex * 100;
-
-                for (let i = wordArray.length - 1; i > 0; i--) {
-                    const j = Math.floor(seededRandom(seed + i) * (i + 1));
-                    [wordArray[i], wordArray[j]] = [wordArray[j], wordArray[i]];
-                }
-
-                let scrambled = wordArray.join("");
-                if (scrambled === word && wordArray.length >= 2) {
-                    [wordArray[0], wordArray[1]] = [wordArray[1], wordArray[0]];
-                    scrambled = wordArray.join("");
-                }
-                return scrambled;
-            }
-
-            function hasPlayedToday() {
                 try {
-                    const playedDate = localStorage.getItem('lastPlayedDate');
-                    if (!playedDate) return false;
-                    const playedDateClean = playedDate.split("?")[0];
-                    const todayClean = today.split("?")[0];
-                    return playedDateClean === todayClean;
+                    const formattedPhone = `+1${phoneNumber}`; // Assuming US numbers
+                    const confirmationResult = await signInWithPhoneNumber(firebaseAuth, formattedPhone, recaptchaVerifier);
+                    window.confirmationResult = confirmationResult;
+                    
+                    // Show verification code input
+                    elements.phoneInputContainer.style.display = 'none';
+                    elements.verificationContainer.style.display = 'block';
+                    showMessage("Verification code sent!", "correct");
                 } catch (error) {
-                    console.error("Local storage error:", error);
+                    console.error("Error sending verification code:", error);
+                    showMessage("Error sending verification code. Please try again.", "incorrect");
+                }
+            }
+            
+            async function verifyCode() {
+                const code = elements.verificationCodeInput.value;
+                if (!code || code.length !== 6) {
+                    showMessage("Please enter the 6-digit verification code", "incorrect");
+                    return;
+                }
+                
+                try {
+                    const result = await window.confirmationResult.confirm(code);
+                    userProfile.phoneNumber = result.user.phoneNumber;
+                    userProfile.verified = true;
+                    
+                    // Save phone number to Firebase
+                    const userRef = ref(firebaseDB, `users/${result.user.uid}`);
+                    await set(userRef, {
+                        phoneNumber: userProfile.phoneNumber,
+                        lastLogin: Date.now()
+                    });
+                    
+                    // Show username input
+                    elements.verificationContainer.style.display = 'none';
+                    elements.usernameContainer.style.display = 'block';
+                    showMessage("Phone verified! Choose a username", "correct");
+                } catch (error) {
+                    console.error("Error verifying code:", error);
+                    showMessage("Invalid verification code. Please try again.", "incorrect");
+                }
+            }
+            
+            // Username validation
+            async function validateUsername(username) {
+                if (!username || username.length < 3 || username.length > 15) {
                     return false;
                 }
+                
+                // Check if username is available
+                const usernameRef = ref(firebaseDB, `usernames/${username}`);
+                const snapshot = await get(usernameRef);
+                return !snapshot.exists();
             }
-
-            function saveToday(finalScore) {
+            
+            async function setUsername() {
+                const username = elements.playerUsernameInput.value.trim();
+                if (!await validateUsername(username)) {
+                    showMessage("Username is taken or invalid (3-15 characters)", "incorrect");
+                    return;
+                }
+                
                 try {
-                    localStorage.setItem('lastPlayedDate', today);
-                    localStorage.setItem('lastScore', finalScore);
-                    localStorage.setItem('wordsSolved', wordsSolved);
-                    localStorage.setItem('lastInitials', playerInitials);
+                    // Save username to Firebase
+                    const userRef = ref(firebaseDB, `users/${firebaseAuth.currentUser.uid}`);
+                    await set(userRef, {
+                        ...userProfile,
+                        username: username,
+                        lastLogin: Date.now()
+                    });
                     
-                    // Save streak
-                    if (finalScore > 0) {
-                        streak = (parseInt(localStorage.getItem('streak') || '0')) + 1;
-                        localStorage.setItem('streak', streak);
-                    } else {
-                        streak = 0;
-                        localStorage.setItem('streak', 0);
-                    }
+                    // Reserve username
+                    const usernameRef = ref(firebaseDB, `usernames/${username}`);
+                    await set(usernameRef, {
+                        uid: firebaseAuth.currentUser.uid,
+                        timestamp: Date.now()
+                    });
+                    
+                    userProfile.username = username;
+                    showMessage("Username set! Ready to play!", "correct");
+                    
+                    // Enable start game button
+                    elements.startButton.disabled = false;
                 } catch (error) {
-                    console.error("Local storage error:", error);
-                }
-            }
-
-            function getNextWord() {
-                if (currentWordIndex >= dailyWords.length) currentWordIndex = 0;
-                currentWord = dailyWords[currentWordIndex];
-                currentScrambled = scrambleWord(currentWord, today.split("?")[0], currentWordIndex);
-                elements.scrambledWord.textContent = currentScrambled;
-                
-                // Add animation class for new word appearance
-                elements.scrambledWord.classList.add('new-word');
-                setTimeout(() => {
-                    elements.scrambledWord.classList.remove('new-word');
-                }, 600);
-                
-                elements.userGuess.value = "";
-                elements.message.textContent = "";
-                elements.message.className = "";
-                elements.userGuess.focus();
-            }
-
-            function checkAnswer() {
-                if (!gameActive) return;
-                const userGuess = elements.userGuess.value.trim().toUpperCase();
-
-                if (userGuess === currentWord) {
-                    updateWordStats(currentWord, true);
-                    elements.message.textContent = "Correct!";
-                    elements.message.className = "correct";
-                    
-                    // Calculate points with combo system
-                    const timeSinceLastSolve = lastSolveTime > 0 ? Date.now() - lastSolveTime : 0;
-                    lastSolveTime = Date.now();
-                    
-                    // Quick consecutive solves increase combo multiplier
-                    if (timeSinceLastSolve > 0 && timeSinceLastSolve < 5000) { // 5 seconds
-                        currentStreak++;
-                        if (currentStreak >= 3) {
-                            comboMultiplier = Math.min(3, 1 + Math.floor(currentStreak / 3)); // Max 3x multiplier
-                            
-                            // Show combo message
-                            elements.comboDisplay.textContent = `${comboMultiplier}x COMBO!`;
-                            elements.comboDisplay.classList.add('active');
-                            setTimeout(() => {
-                                elements.comboDisplay.classList.remove('active');
-                            }, 2000);
-                        }
-                    } else {
-                        currentStreak = 1;
-                        comboMultiplier = 1;
-                    }
-                    
-                    const basePoints = currentWord.length * 10;
-                    const points = basePoints * comboMultiplier;
-                    
-                    score += points;
-                    wordsSolved++;
-                    elements.score.textContent = score;
-                    elements.wordsSolved.textContent = wordsSolved;
-                    elements.userGuess.value = "";
-                    currentWordIndex++;
-                    
-                    getNextWord();
-                } else if (userGuess !== "") {
-                    elements.message.textContent = "Try again!";
-                    elements.message.className = "incorrect";
-                    currentStreak = 0;
-                    comboMultiplier = 1;
-                }
-            }
-
-            function skipWord() {
-                if (!gameActive) return;
-                updateWordStats(currentWord, false);
-                elements.userGuess.value = "";
-                currentWordIndex++;
-                currentStreak = 0;
-                comboMultiplier = 1;
-                getNextWord();
-            }
-
-            function updateTimer() {
-                // Update text
-                elements.timer.textContent = `Time: ${timeLeft}s`;
-                
-                // Update progress bar
-                const percentage = (timeLeft / GAME_TIME) * 100;
-                elements.timerProgress.style.width = `${percentage}%`;
-                
-                // Add pulse animation when time is low
-                if (timeLeft <= 5) {
-                    elements.timer.classList.add('low');
-                } else {
-                    elements.timer.classList.remove('low');
-                }
-            }
-
-            function setupShareLink(elementId) {
-                const gameLink = window.location.href;
-                const currentDate = new Date();
-                const options = { weekday: 'long', month: 'short', day: 'numeric' };
-                const formattedDate = currentDate.toLocaleDateString('en-US', options);
-                const displayScore = elementId === "share-link" ? score : (localStorage.getItem('lastScore') || "0");
-                const shareMessage = `Scrambl ${formattedDate}: ${displayScore} points. ${gameLink}`;
-                
-                // SMS share
-                document.getElementById(elementId).href = `sms:?&body=${encodeURIComponent(shareMessage)}`;
-                
-                // Twitter share
-                const twitterId = elementId === "share-link" ? "twitter-share" : "twitter-share-played";
-                document.getElementById(twitterId).href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}`;
-            }
-
-            function updateStreakDisplay() {
-                try {
-                    const currentStreak = parseInt(localStorage.getItem('streak') || '0');
-                    if (currentStreak > 0) {
-                        elements.streakDisplay.textContent = `${currentStreak} day streak 🔥`;
-                        elements.currentStreakDisplay.textContent = `${currentStreak} day streak 🔥`;
-                        elements.gameOverStreakDisplay.textContent = `${currentStreak} day streak 🔥`;
-                    } else {
-                        elements.streakDisplay.textContent = '';
-                        elements.currentStreakDisplay.textContent = '';
-                        elements.gameOverStreakDisplay.textContent = '';
-                    }
-                } catch (error) {
-                    console.error("Streak display error:", error);
-                }
-            }
-
-            function endGame() {
-                gameActive = false;
-                cancelAnimationFrame(timer);
-                document.getElementById("final-score-display").textContent = `${wordsSolved} words | ${score} points`;
-                
-                setupShareLink("share-link");
-
-                // Track game completed
-                analytics.trackGameCompleted(score, wordsSolved, 'normal');
-                
-                // Save score to Firebase and local storage
-                saveToday(score);
-                
-                // Add to leaderboard (which will handle adding to Firebase)
-                addScoreToLeaderboard(playerInitials, score, Date.now());
-                
-                elements.gamePlay.style.display = "none";
-                elements.gameOver.style.display = "block";
-                updateCountdown();
-                updateStreakDisplay();
-                setInterval(updateCountdown, 60000);
-            }
-            
-            function animateTimer() {
-                const now = Date.now();
-                const elapsed = (now - startTime) / 1000;
-                
-                if (elapsed >= 1) {
-                    timeLeft--;
-                    updateTimer();
-                    startTime = now;
-                    
-                    if (timeLeft <= 0) {
-                        endGame();
-                        return;
-                    }
-                }
-                
-                if (gameActive) {
-                    timer = requestAnimationFrame(animateTimer);
+                    console.error("Error setting username:", error);
+                    showMessage("Error setting username. Please try again.", "incorrect");
                 }
             }
             
-            let startTime;
+            // Helper function for messages
+            function showMessage(text, className) {
+                elements.message.textContent = text;
+                elements.message.className = className;
+            }
             
+            // Modify startGame function
             function startGame() {
                 if (hasPlayedToday()) return;
+                if (!userProfile.verified || !userProfile.username) {
+                    showMessage("Please complete verification first", "incorrect");
+                    return;
+                }
                 
                 // Get player initials
                 playerInitials = elements.playerInitialsInput.value.trim().toUpperCase().substring(0, 3);
@@ -1171,12 +937,16 @@
                 elements.gameOver.style.display = "none";
 
                 getNextWord();
-                
-                // Use requestAnimationFrame for better performance
-                startTime = Date.now();
-                timer = requestAnimationFrame(animateTimer);
             }
-
+            
+            // Add event listeners
+            elements.verifyPhoneBtn.addEventListener("click", sendVerificationCode);
+            elements.submitVerificationBtn.addEventListener("click", verifyCode);
+            elements.playerUsernameInput.addEventListener("input", function() {
+                this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '');
+            });
+            
+            // Initialize game
             function initGame() {
                 const timestamp = new Date().getTime();
                 today = getCurrentDateCT() + "?t=" + timestamp;
@@ -1233,107 +1003,41 @@
 
                 // Load word stats
                 getMostStats();
-            }
-
-            // Event listeners
-            elements.startButton.addEventListener("click", startGame);
-            elements.submitBtn.addEventListener("click", checkAnswer);
-            elements.skipBtn.addEventListener("click", skipWord);
-            
-            // Add event listener for the initials input to enforce uppercase
-            elements.playerInitialsInput.addEventListener("input", function() {
-                this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            });
-            
-            // Share button tracking
-            elements.shareLink.addEventListener("click", function() {
-                analytics.trackShare("game_completed", score, "sms");
-            });
-            
-            elements.shareLinkPlayed.addEventListener("click", function() {
-                const lastScore = localStorage.getItem('lastScore') || "0";
-                analytics.trackShare("already_played", parseInt(lastScore), "sms");
-            });
-            
-            elements.twitterShare.addEventListener("click", function() {
-                analytics.trackShare("game_completed", score, "twitter");
-            });
-            
-            elements.twitterSharePlayed.addEventListener("click", function() {
-                const lastScore = localStorage.getItem('lastScore') || "0";
-                analytics.trackShare("already_played", parseInt(lastScore), "twitter");
-            });
-
-            elements.userGuess.addEventListener("keypress", (e) => {
-                if (e.key === "Enter") checkAnswer();
-            });
-            
-            // Add keyboard shortcuts for better accessibility
-            document.addEventListener("keydown", (e) => {
-                if (!gameActive) return;
                 
-                // Escape key to skip word
-                if (e.key === "Escape") {
-                    skipWord();
-                }
-            });
-
-            // Initialize game on page load
-            window.addEventListener("DOMContentLoaded", initGame);
-            
-            // Add these functions after your existing Firebase functions
-            function updateWordStats(word, isSolved) {
-                const dateKey = getCurrentDateCT().split("?")[0].replace(/-/g, "");
-                const statsRef = ref(firebaseDB, `wordStats/${dateKey}/${word}`);
+                // Initialize reCAPTCHA
+                initRecaptcha();
                 
-                // Get current stats
-                get(statsRef).then((snapshot) => {
-                    const data = snapshot.val() || { solved: 0, skipped: 0 };
-                    if (isSolved) {
-                        data.solved = (data.solved || 0) + 1;
+                // Check for existing user session
+                firebaseAuth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        // User is signed in
+                        const userRef = ref(firebaseDB, `users/${user.uid}`);
+                        const snapshot = await get(userRef);
+                        if (snapshot.exists()) {
+                            const userData = snapshot.val();
+                            userProfile = {
+                                phoneNumber: userData.phoneNumber,
+                                username: userData.username,
+                                verified: true
+                            };
+                            
+                            // Show game start screen
+                            elements.phoneInputContainer.style.display = 'none';
+                            elements.verificationContainer.style.display = 'none';
+                            elements.usernameContainer.style.display = 'none';
+                            elements.startScreen.style.display = 'block';
+                        }
                     } else {
-                        data.skipped = (data.skipped || 0) + 1;
+                        // User is not signed in
+                        elements.phoneInputContainer.style.display = 'block';
+                        elements.verificationContainer.style.display = 'none';
+                        elements.usernameContainer.style.display = 'none';
+                        elements.startScreen.style.display = 'none';
                     }
-                    // Update stats
-                    return set(statsRef, data);
-                }).catch((error) => {
-                    console.error("Error updating word stats:", error);
                 });
             }
             
-            function getMostStats() {
-                const dateKey = getCurrentDateCT().split("?")[0].replace(/-/g, "");
-                const statsRef = ref(firebaseDB, `wordStats/${dateKey}`);
-                
-                // Set up real-time listener for stats
-                onValue(statsRef, (snapshot) => {
-                    const stats = snapshot.val() || {};
-                    let mostSolved = { word: '-', count: 0 };
-                    let mostSkipped = { word: '-', count: 0 };
-                    
-                    Object.entries(stats).forEach(([word, data]) => {
-                        if (data.solved > mostSolved.count) {
-                            mostSolved = { word, count: data.solved };
-                        }
-                        if (data.skipped > mostSkipped.count) {
-                            mostSkipped = { word, count: data.skipped };
-                        }
-                    });
-                    
-                    // Update both game over and played today displays
-                    document.getElementById('most-solved-word').textContent = mostSolved.word;
-                    document.getElementById('most-skipped-word').textContent = mostSkipped.word;
-                    document.getElementById('most-solved-word-played').textContent = mostSolved.word;
-                    document.getElementById('most-skipped-word-played').textContent = mostSkipped.word;
-                }, (error) => {
-                    console.error("Error getting word stats:", error);
-                });
-            }
-
-            // Public API
-            return {
-                start: startGame
-            };
+            // ... rest of existing code ...
         })();
     </script>
 </body>

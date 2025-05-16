@@ -791,7 +791,6 @@
                     recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, 'recaptcha-container', {
                         'size': 'invisible',
                         'callback': (response) => {
-                            // reCAPTCHA solved, enable phone verification
                             elements.verifyPhoneBtn.disabled = false;
                         },
                         'expired-callback': () => {
@@ -799,8 +798,11 @@
                             showMessage('reCAPTCHA expired. Please reload the page.', 'incorrect');
                         }
                     });
-                    recaptchaVerifier.render(); // Ensure reCAPTCHA is rendered
+                    recaptchaVerifier.render();
                     window.recaptchaVerifier = recaptchaVerifier; // Expose globally for debugging
+                    console.log('recaptchaVerifier initialized:', recaptchaVerifier);
+                } else {
+                    console.log('recaptchaVerifier already exists:', recaptchaVerifier);
                 }
             }
             
@@ -968,6 +970,7 @@
             
             // Initialize game
             function initGame() {
+                console.log('initGame called');
                 initRecaptcha(); // Ensure reCAPTCHA is initialized on page load
                 const timestamp = new Date().getTime();
                 today = getCurrentDateCT() + "?t=" + timestamp;

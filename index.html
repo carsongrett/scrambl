@@ -944,12 +944,21 @@ const firebaseConfig = {
                 
                 playerInitials = initials;
                 
+                // Get username if signed in
+                let username = null;
+                if (window.currentUser && window.currentUser.displayName) {
+                    username = window.currentUser.displayName;
+                } else if (window.currentUser && window.currentUser.uid) {
+                    // Try to get username from Firestore if available
+                    // (This is async, but for leaderboard, we use displayName or initials)
+                }
                 // Save score to Firebase
                 const leaderboardRef = getLeaderboardRef();
                 const newScoreRef = push(leaderboardRef);
                 
                 set(newScoreRef, {
                     initials: initials,
+                    username: username, // Save username if available
                     score: playerScore,
                     wordsSolved: wordsSolved,
                     timestamp: timestamp
@@ -959,29 +968,25 @@ const firebaseConfig = {
                 })
                 .catch((error) => {
                     console.error("Error saving score to Firebase:", error);
-                    
                     // Fallback to localStorage if Firebase save fails
                     dailyLeaderboard.push({
                         initials: initials,
+                        username: username,
                         score: playerScore,
                         wordsSolved: wordsSolved,
                         timestamp: timestamp
                     });
-                    
                     saveLeaderboard();
                 });
             }
             
             function updateLeaderboardDisplay(containerElement) {
                 if (!containerElement) return; // Skip if container element doesn't exist
-                
                 if (dailyLeaderboard.length === 0) {
                     containerElement.innerHTML = `<div class="leaderboard-empty">Be the first to rank!</div>`;
                     return;
                 }
-                
                 containerElement.innerHTML = "";
-                
                 // Display top entries
                 const displayCount = Math.min(dailyLeaderboard.length, MAX_LEADERBOARD_ENTRIES);
                 for (let i = 0; i < displayCount; i++) {
@@ -989,11 +994,11 @@ const firebaseConfig = {
                     const isCurrentPlayer = entry.initials === playerInitials && 
                                            entry.score === score && 
                                            entry.timestamp === lastSolveTime;
-                    
+                    const displayName = entry.username ? entry.username : entry.initials;
                     const entryDiv = document.createElement("div");
                     entryDiv.className = `leaderboard-entry ${isCurrentPlayer ? "highlight" : ""}`;
                     entryDiv.innerHTML = `
-                        <span><span class="rank">${i + 1}.</span> <span class="initials">${entry.initials}</span></span>
+                        <span><span class="rank">${i + 1}.</span> <span class="initials">${displayName}</span></span>
                         <span class="score">${entry.score} pts</span>
                     `;
                     containerElement.appendChild(entryDiv);

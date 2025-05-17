@@ -997,7 +997,7 @@ const firebaseConfig = {
                     const isCurrentPlayer = entry.initials === playerInitials && 
                                            entry.score === score && 
                                            entry.timestamp === lastSolveTime;
-                    const displayName = entry.username ? entry.username : entry.initials;
+                    const displayName = (entry.username && entry.username.trim() !== "") ? entry.username : entry.initials;
                     const entryDiv = document.createElement("div");
                     entryDiv.className = `leaderboard-entry ${isCurrentPlayer ? "highlight" : ""}`;
                     entryDiv.innerHTML = `

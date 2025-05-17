@@ -344,7 +344,14 @@ const firebaseConfig = {
         
         .leaderboard-entry .initials {
             font-weight: bold;
+        }
+        
+        .leaderboard-entry .username-style {
             color: var(--accent-main);
+        }
+        
+        .leaderboard-entry .initials-style {
+            color: #222;
         }
         
         .leaderboard-entry .score {
@@ -523,12 +530,42 @@ const firebaseConfig = {
             padding: 10px 16px;
             border-radius: 4px;
             font-weight: 500;
-            margin: 10px 0;
+            margin: 10px auto 0 auto;
             transition: background-color 0.3s;
+            width: 100%;
+            max-width: 350px;
         }
 
         .google-sign-in:hover {
             background-color: #f8f8f8;
+        }
+
+        .sign-in-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            background: rgba(75, 78, 109, 0.12);
+            border: 2px solid var(--accent-main);
+            border-radius: 12px;
+            padding: 18px 10px 12px 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .sign-in-desc {
+            color: var(--accent-main);
+            font-size: 0.92em;
+            margin-top: 6px;
+            margin-bottom: 6px;
+            text-align: center;
+            line-height: 1.3;
+            max-width: 340px;
+            opacity: 0.85;
+        }
+        @media (max-width: 480px) {
+            .google-sign-in {
+                max-width: 95vw;
+            }
         }
 
         /* Modal styles */
@@ -574,6 +611,14 @@ const firebaseConfig = {
         <div class="logo-container">
             <img src="scrambl-logo.png" alt="Scrambl" class="game-logo">
         </div>
+        <!-- Move sign in button here -->
+        <div class="sign-in-section">
+            <button id="sign-in-btn" class="google-sign-in" style="display: none;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" style="width: 18px; margin-right: 8px;">
+                Sign in with Google
+            </button>
+            <div class="sign-in-desc">signing in allows you to create a username and save your stats. your username will appear on the leaderboard. if you are not signed in, input your initials below</div>
+        </div>
         <div class="daily-date" id="daily-date"></div>
 
         <div class="start-screen" id="start-screen">
@@ -585,12 +630,6 @@ const firebaseConfig = {
             <div class="initials-input">
                 <input type="text" id="player-initials" placeholder="Initials" maxlength="3" autocomplete="off">
             </div>
-            
-            <!-- Sign in button -->
-            <button id="sign-in-btn" class="google-sign-in" style="display: none;">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" style="width: 18px; margin-right: 8px;">
-                Sign in with Google
-            </button>
             
             <!-- Username modal -->
             <div id="username-modal" class="modal" style="display: none;">
@@ -817,7 +856,7 @@ const firebaseConfig = {
             // New variables for leaderboard functionality
             let playerInitials = "";
             let dailyLeaderboard = [];
-            const MAX_LEADERBOARD_ENTRIES = 3;
+            const MAX_LEADERBOARD_ENTRIES = 5;
 
             // Cache DOM elements
             const elements = {
@@ -998,11 +1037,12 @@ const firebaseConfig = {
                     const isCurrentPlayer = entry.initials === playerInitials && 
                                            entry.score === score && 
                                            entry.timestamp === lastSolveTime;
-                    const displayName = (entry.username && entry.username.trim() !== "") ? entry.username : entry.initials;
+                    const isUsername = (entry.username && entry.username.trim() !== "");
+                    const displayName = isUsername ? entry.username : entry.initials;
                     const entryDiv = document.createElement("div");
                     entryDiv.className = `leaderboard-entry ${isCurrentPlayer ? "highlight" : ""}`;
                     entryDiv.innerHTML = `
-                        <span><span class="rank">${i + 1}.</span> <span class="initials">${displayName}</span></span>
+                        <span><span class="rank">${i + 1}.</span> <span class="initials ${isUsername ? 'username-style' : 'initials-style'}">${displayName}</span></span>
                         <span class="score">${entry.score} pts</span>
                     `;
                     containerElement.appendChild(entryDiv);

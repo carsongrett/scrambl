@@ -645,6 +645,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getDatabase, ref, set, onValue, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import * as firebaseui from "https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.js";
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -662,6 +664,8 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
+        const auth = getAuth(app);
+        const ui = new firebaseui.auth.AuthUI(auth);
         
         // Game module pattern
         const ScramblGame = (function() {
@@ -1340,81 +1344,56 @@
             };
         })();
 
-        // Add after Firebase initialization
-        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        const auth = getAuth(app);
-
         let isSignedIn = false;
         let currentUsername = null;
         let playerInitials = "";
 
-        // Google sign-in handler
-        function handleGoogleSignIn() {
-            signInWithPopup(auth, new GoogleAuthProvider()).then(() => {
-                // Will trigger onAuthStateChanged
-            });
-        }
-
-        document.getElementById('google-signin-btn').onclick = handleGoogleSignIn;
-        document.getElementById('gameover-google-signin-btn').onclick = handleGoogleSignIn;
-
-        // Username logic (for signed-in users)
-        const usernameContainer = document.getElementById('username-container');
-        const usernameInput = document.getElementById('username-input');
-        const setUsernameBtn = document.getElementById('set-username-btn');
-        const usernameError = document.getElementById('username-error');
-
-        function checkUsername() {
-            const user = auth.currentUser;
-            if (!user) return;
-            const usernameRef = ref(database, 'usernames/' + user.uid);
-            get(usernameRef).then((snapshot) => {
-                if (snapshot.exists() && snapshot.val().username) {
-                    currentUsername = snapshot.val().username;
-                    usernameContainer.style.display = 'none';
-                    document.querySelector('.game-container').style.display = 'block';
-                    document.getElementById('start-screen').style.display = 'block';
-                } else {
-                    document.querySelector('.game-container').style.display = 'none';
-                    document.getElementById('start-screen').style.display = 'none';
-                    usernameContainer.style.display = 'block';
-                }
-            });
-        }
-
-        setUsernameBtn.onclick = function() {
-            const val = usernameInput.value.trim();
-            if (!val.match(/^[A-Za-z0-9_]{3,15}$/)) {
-                usernameError.textContent = 'Username must be 3-15 letters, numbers, or underscores.';
-                return;
-            }
-            // Check uniqueness
-            get(ref(database, 'usernames')).then((snapshot) => {
-                let taken = false;
-                snapshot.forEach(child => {
-                    if (child.val().username && child.val().username.toLowerCase() === val.toLowerCase()) {
-                        taken = true;
+        // Show FirebaseUI widget for Google sign-in
+        const googleSignInBtn = document.getElementById('google-signin-btn');
+        googleSignInBtn.onclick = function() {
+            document.getElementById('firebaseui-auth-container').style.display = 'block';
+            ui.start('#firebaseui-auth-container', {
+                signInOptions: [GoogleAuthProvider.PROVIDER_ID],
+                callbacks: {
+                    signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                        document.getElementById('firebaseui-auth-container').style.display = 'none';
+                        // Your post-sign-in logic here
+                        return false; // Prevent redirect
                     }
-                });
-                if (taken) {
-                    usernameError.textContent = 'That username is taken.';
-                    return;
                 }
-                // Save username
-                const user = auth.currentUser;
-                set(ref(database, 'usernames/' + user.uid), { username: val }).then(() => {
-                    currentUsername = val;
-                    usernameContainer.style.display = 'none';
-                    document.querySelector('.game-container').style.display = 'block';
-                    document.getElementById('start-screen').style.display = 'block';
-                });
             });
         };
+
+        // Hide/show UI elements based on auth/initials state
+        function updateHomeUI() {
+            if (isSignedIn) {
+                document.getElementById('google-signin-btn').style.display = 'none';
+                document.getElementById('initials-input-container').style.display = 'none';
+                document.getElementById('start-game').style.display = 'inline-block';
+                document.getElementById('leaderboard').style.display = 'block';
+            } else if (playerInitials && playerInitials.length > 0) {
+                document.getElementById('google-signin-btn').style.display = 'inline-block';
+                document.getElementById('initials-input-container').style.display = 'block';
+                document.getElementById('start-game').style.display = 'inline-block';
+                document.getElementById('leaderboard').style.display = 'block';
+            } else {
+                document.getElementById('google-signin-btn').style.display = 'inline-block';
+                document.getElementById('initials-input-container').style.display = 'block';
+                document.getElementById('start-game').style.display = 'inline-block';
+                document.getElementById('leaderboard').style.display = 'none';
+            }
+        }
+
+        document.getElementById('player-initials').addEventListener('input', function() {
+            playerInitials = this.value.trim().toUpperCase().substring(0, 3);
+            updateHomeUI();
+        });
 
         // On page load, check auth state
         onAuthStateChanged(auth, (user) => {
             isSignedIn = !!user;
             if (isSignedIn) {
+                document.getElementById('firebaseui-auth-container').style.display = 'none';
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('google-signin-btn').style.display = 'none';
                 document.getElementById('initials-input-container').style.display = 'none';
@@ -1422,14 +1401,39 @@
                 checkUsername();
             } else {
                 currentUsername = null;
+                document.getElementById('firebaseui-auth-container').style.display = 'none';
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('google-signin-btn').style.display = 'inline-block';
                 document.getElementById('initials-input-container').style.display = 'block';
                 document.getElementById('start-game').textContent = 'Play Anonymously';
                 document.querySelector('.game-container').style.display = 'block';
                 document.getElementById('start-screen').style.display = 'block';
+                updateHomeUI();
             }
         });
+
+        // On game over, show Google sign-in if not signed in
+        function showGameOver() {
+            // ... your existing game over logic ...
+            if (!isSignedIn) {
+                document.getElementById('gameover-google-signin-container').style.display = 'block';
+                // Also allow sign-in from game over page
+                document.getElementById('gameover-google-signin-btn').onclick = function() {
+                    document.getElementById('firebaseui-auth-container').style.display = 'block';
+                    ui.start('#firebaseui-auth-container', {
+                        signInOptions: [GoogleAuthProvider.PROVIDER_ID],
+                        callbacks: {
+                            signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                                document.getElementById('firebaseui-auth-container').style.display = 'none';
+                                return false;
+                            }
+                        }
+                    });
+                };
+            } else {
+                document.getElementById('gameover-google-signin-container').style.display = 'none';
+            }
+        }
     </script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.css" />

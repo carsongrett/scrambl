@@ -491,17 +491,6 @@
     </style>
 </head>
 <body>
-    <!-- Add these containers above your game container -->
-    <div id="auth-container" style="display:none;">
-        <h2>Sign in to play</h2>
-        <div id="firebaseui-auth-container"></div>
-    </div>
-    <div id="username-container" style="display:none;">
-        <h2>Choose a username for the leaderboard</h2>
-        <input type="text" id="username-input" maxlength="15" placeholder="Username" />
-        <button id="set-username-btn">Set Username</button>
-        <div id="username-error" style="color:red;"></div>
-    </div>
     <div class="game-container">
         <!-- Replaced h1 with logo image -->
         <div class="logo-container">
@@ -514,13 +503,10 @@
             <p>solve the most words in 30 seconds</p>
             <p>10 points for each letter in a word</p>
             
-            <!-- Initials input for anonymous play -->
-            <div class="initials-input" id="initials-input-container">
+            <!-- Added initials input -->
+            <div class="initials-input">
                 <input type="text" id="player-initials" placeholder="Initials" maxlength="3" autocomplete="off">
             </div>
-            
-            <!-- Google sign-in button -->
-            <button id="google-signin-btn" type="button">Sign in with Google</button>
             
             <!-- Leaderboard display -->
             <div class="leaderboard" id="leaderboard">
@@ -533,41 +519,41 @@
             <!-- Streak display -->
             <div class="streak-display" id="streak-display"></div>
             
-            <button id="start-game" role="button" aria-label="Start game">Play Anonymously</button>
+            <button id="start-game" role="button" aria-label="Start game">Play</button>
         </div>
 
         <div class="played-today" id="played-today">
-            <p>Already played today.</p>
-            <div class="final-score">Score: <span id="today-score">0</span></div>
-            <div class="streak-display" id="current-streak-display"></div>
-            <div class="countdown" id="countdown"></div>
-            
-            <!-- Added stats display -->
-            <div class="stats-display">
-                <div class="stat-item">
-                    <span class="stat-label">Most Solved:</span>
-                    <span class="stat-value" id="most-solved-word-played">-</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Most Skipped:</span>
-                    <span class="stat-value" id="most-skipped-word-played">-</span>
-                </div>
-            </div>
-            
-            <!-- Added leaderboard to played-today screen - MOVED ABOVE SHARE BUTTONS -->
-            <div class="leaderboard" id="played-today-leaderboard">
-                <h3>today's top scores</h3>
-                <div class="leaderboard-entries" id="played-today-leaderboard-entries">
-                    <div class="leaderboard-empty">Be the first to rank!</div>
-                </div>
-            </div>
-            
-            <!-- Share buttons now below leaderboard -->
-            <div class="share-score">
-                <a id="share-link-played" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
-                <a id="twitter-share-played" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
-            </div>
+    <p>Already played today.</p>
+    <div class="final-score">Score: <span id="today-score">0</span></div>
+    <div class="streak-display" id="current-streak-display"></div>
+    <div class="countdown" id="countdown"></div>
+    
+    <!-- Added stats display -->
+    <div class="stats-display">
+        <div class="stat-item">
+            <span class="stat-label">Most Solved:</span>
+            <span class="stat-value" id="most-solved-word-played">-</span>
         </div>
+        <div class="stat-item">
+            <span class="stat-label">Most Skipped:</span>
+            <span class="stat-value" id="most-skipped-word-played">-</span>
+        </div>
+    </div>
+    
+    <!-- Added leaderboard to played-today screen - MOVED ABOVE SHARE BUTTONS -->
+    <div class="leaderboard" id="played-today-leaderboard">
+        <h3>today's top scores</h3>
+        <div class="leaderboard-entries" id="played-today-leaderboard-entries">
+            <div class="leaderboard-empty">Be the first to rank!</div>
+        </div>
+    </div>
+    
+    <!-- Share buttons now below leaderboard -->
+    <div class="share-score">
+        <a id="share-link-played" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
+        <a id="twitter-share-played" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
+    </div>
+</div>
 
         <div class="game-play" id="game-play">
             <div class="score-display">
@@ -601,43 +587,39 @@
         </div>
 
         <div class="game-over" id="game-over">
-            <p>Game Over</p>
-            <div class="final-score" id="final-score-display"></div>
-            
-            <!-- Added stats display -->
-            <div class="stats-display">
-                <div class="stat-item">
-                    <span class="stat-label">Most Solved:</span>
-                    <span class="stat-value" id="most-solved-word">-</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Most Skipped:</span>
-                    <span class="stat-value" id="most-skipped-word">-</span>
-                </div>
-            </div>
-            
-            <!-- Added leaderboard to game over screen - MOVED ABOVE SHARE BUTTONS -->
-            <div class="leaderboard" id="game-over-leaderboard">
-                <h3>today's top scores</h3>
-                <div class="leaderboard-entries" id="game-over-leaderboard-entries">
-                    <div class="leaderboard-empty">Be the first to rank!</div>
-                </div>
-            </div>
-            
-            <!-- Share buttons now below leaderboard -->
-            <div class="share-score">
-                <a id="share-link" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
-                <a id="twitter-share" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
-            </div>
-            
-            <!-- Added streak display to game over screen -->
-            <div class="streak-display" id="game-over-streak-display"></div>
-            <div class="countdown" id="countdown-end"></div>
-            <div id="gameover-google-signin-container" style="margin-top:20px; display:none;">
-                <button id="gameover-google-signin-btn" type="button">Sign in with Google</button>
-            </div>
+    <p>Game Over</p>
+    <div class="final-score" id="final-score-display"></div>
+    
+    <!-- Added stats display -->
+    <div class="stats-display">
+        <div class="stat-item">
+            <span class="stat-label">Most Solved:</span>
+            <span class="stat-value" id="most-solved-word">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Most Skipped:</span>
+            <span class="stat-value" id="most-skipped-word">-</span>
         </div>
     </div>
+    
+    <!-- Added leaderboard to game over screen - MOVED ABOVE SHARE BUTTONS -->
+    <div class="leaderboard" id="game-over-leaderboard">
+        <h3>today's top scores</h3>
+        <div class="leaderboard-entries" id="game-over-leaderboard-entries">
+            <div class="leaderboard-empty">Be the first to rank!</div>
+        </div>
+    </div>
+    
+    <!-- Share buttons now below leaderboard -->
+    <div class="share-score">
+        <a id="share-link" href="#" target="_blank" aria-label="Share via SMS">Share on SMS</a>
+        <a id="twitter-share" href="#" target="_blank" class="twitter-share" aria-label="Share on Twitter/X">Share on Twitter/X</a>
+    </div>
+    
+    <!-- Added streak display to game over screen -->
+    <div class="streak-display" id="game-over-streak-display"></div>
+    <div class="countdown" id="countdown-end"></div>
+</div>
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -645,8 +627,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getDatabase, ref, set, onValue, push, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-        import { getAuth, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import * as firebaseui from "https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.js";
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -664,8 +644,6 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
-        const auth = getAuth(app);
-        const ui = new firebaseui.auth.AuthUI(auth);
         
         // Game module pattern
         const ScramblGame = (function() {
@@ -724,8 +702,8 @@
                 
                 // 25 six-letter words
                 "ACROSS", "CUSTOM", "CAMERA", "ALMOND", "DRAGON", "FOREST", "JUMPER", "GUITAR", "ISLAND", "JACKET", 
-"LADDER", "MARKET", "YELLOW", "ORANGE", "NARROW", "HEIGHT", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
-"TURTLE", "VELVET", "DEFEND", "WINDOW", "WINTER",
+                "LADDER", "MARKET", "YELLOW", "ORANGE", "NARROW", "HEIGHT", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
+                "TURTLE", "VELVET", "DEFEND", "WINDOW", "WINTER",
                 
                 // 25 seven-letter words
                 "BANANA", "BUTTON", "UNCOVER", "JOURNEY", "DRAGON", "FOREST", "DIAMOND", "TWITTER", "ISLAND", "JACKET", 
@@ -864,39 +842,69 @@
                 }
             }
             
+            function addScoreToLeaderboard(initials, playerScore, timestamp) {
+                if (!initials || initials.trim() === "") {
+                    initials = "???";
+                } else {
+                    initials = initials.trim().toUpperCase().substring(0, 3);
+                }
+                
+                playerInitials = initials;
+                
+                // Save score to Firebase
+                const leaderboardRef = getLeaderboardRef();
+                const newScoreRef = push(leaderboardRef);
+                
+                set(newScoreRef, {
+                    initials: initials,
+                    score: playerScore,
+                    wordsSolved: wordsSolved,
+                    timestamp: timestamp
+                })
+                .then(() => {
+                    console.log("Score saved to Firebase successfully");
+                })
+                .catch((error) => {
+                    console.error("Error saving score to Firebase:", error);
+                    
+                    // Fallback to localStorage if Firebase save fails
+                    dailyLeaderboard.push({
+                        initials: initials,
+                        score: playerScore,
+                        wordsSolved: wordsSolved,
+                        timestamp: timestamp
+                    });
+                    
+                    saveLeaderboard();
+                });
+            }
+            
             function updateLeaderboardDisplay(containerElement) {
-                if (!containerElement) return;
+                if (!containerElement) return; // Skip if container element doesn't exist
+                
                 if (dailyLeaderboard.length === 0) {
                     containerElement.innerHTML = `<div class="leaderboard-empty">Be the first to rank!</div>`;
                     return;
                 }
+                
                 containerElement.innerHTML = "";
+                
+                // Display top entries
                 const displayCount = Math.min(dailyLeaderboard.length, MAX_LEADERBOARD_ENTRIES);
                 for (let i = 0; i < displayCount; i++) {
                     const entry = dailyLeaderboard[i];
-                    let displayName = entry.username || entry.initials || '???';
-                    const isCurrentPlayer = (isSignedIn && entry.username === currentUsername) || (!isSignedIn && entry.initials === playerInitials && entry.score === score && entry.timestamp === lastSolveTime);
+                    const isCurrentPlayer = entry.initials === playerInitials && 
+                                           entry.score === score && 
+                                           entry.timestamp === lastSolveTime;
+                    
                     const entryDiv = document.createElement("div");
                     entryDiv.className = `leaderboard-entry ${isCurrentPlayer ? "highlight" : ""}`;
                     entryDiv.innerHTML = `
-                        <span><span class="rank">${i + 1}.</span> <span class="initials">${displayName}</span></span>
+                        <span><span class="rank">${i + 1}.</span> <span class="initials">${entry.initials}</span></span>
                         <span class="score">${entry.score} pts</span>
                     `;
                     containerElement.appendChild(entryDiv);
                 }
-            }
-
-            function addScoreToLeaderboard(score, timestamp) {
-                let displayName = isSignedIn ? currentUsername : playerInitials;
-                const leaderboardRef = getLeaderboardRef();
-                const newScoreRef = push(leaderboardRef);
-                set(newScoreRef, {
-                    username: isSignedIn ? currentUsername : null,
-                    initials: !isSignedIn ? playerInitials : null,
-                    score: score,
-                    wordsSolved: wordsSolved,
-                    timestamp: timestamp
-                });
             }
 
             // Game functions
@@ -1106,7 +1114,7 @@
                 saveToday(score);
                 
                 // Add to leaderboard (which will handle adding to Firebase)
-                addScoreToLeaderboard(score, Date.now());
+                addScoreToLeaderboard(playerInitials, score, Date.now());
                 
                 elements.gamePlay.style.display = "none";
                 elements.gameOver.style.display = "block";
@@ -1343,100 +1351,6 @@
                 start: startGame
             };
         })();
-
-        let isSignedIn = false;
-        let currentUsername = null;
-        let playerInitials = "";
-
-        // Show FirebaseUI widget for Google sign-in
-        const googleSignInBtn = document.getElementById('google-signin-btn');
-        googleSignInBtn.onclick = function() {
-            document.getElementById('firebaseui-auth-container').style.display = 'block';
-            ui.start('#firebaseui-auth-container', {
-                signInOptions: [GoogleAuthProvider.PROVIDER_ID],
-                callbacks: {
-                    signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                        document.getElementById('firebaseui-auth-container').style.display = 'none';
-                        // Your post-sign-in logic here
-                        return false; // Prevent redirect
-                    }
-                }
-            });
-        };
-
-        // Hide/show UI elements based on auth/initials state
-        function updateHomeUI() {
-            if (isSignedIn) {
-                document.getElementById('google-signin-btn').style.display = 'none';
-                document.getElementById('initials-input-container').style.display = 'none';
-                document.getElementById('start-game').style.display = 'inline-block';
-                document.getElementById('leaderboard').style.display = 'block';
-            } else if (playerInitials && playerInitials.length > 0) {
-                document.getElementById('google-signin-btn').style.display = 'inline-block';
-                document.getElementById('initials-input-container').style.display = 'block';
-                document.getElementById('start-game').style.display = 'inline-block';
-                document.getElementById('leaderboard').style.display = 'block';
-            } else {
-                document.getElementById('google-signin-btn').style.display = 'inline-block';
-                document.getElementById('initials-input-container').style.display = 'block';
-                document.getElementById('start-game').style.display = 'inline-block';
-                document.getElementById('leaderboard').style.display = 'none';
-            }
-        }
-
-        document.getElementById('player-initials').addEventListener('input', function() {
-            playerInitials = this.value.trim().toUpperCase().substring(0, 3);
-            updateHomeUI();
-        });
-
-        // On page load, check auth state
-        onAuthStateChanged(auth, (user) => {
-            isSignedIn = !!user;
-            if (isSignedIn) {
-                document.getElementById('firebaseui-auth-container').style.display = 'none';
-                document.getElementById('auth-container').style.display = 'none';
-                document.getElementById('google-signin-btn').style.display = 'none';
-                document.getElementById('initials-input-container').style.display = 'none';
-                document.getElementById('start-game').textContent = 'Play';
-                checkUsername();
-            } else {
-                currentUsername = null;
-                document.getElementById('firebaseui-auth-container').style.display = 'none';
-                document.getElementById('auth-container').style.display = 'none';
-                document.getElementById('google-signin-btn').style.display = 'inline-block';
-                document.getElementById('initials-input-container').style.display = 'block';
-                document.getElementById('start-game').textContent = 'Play Anonymously';
-                document.querySelector('.game-container').style.display = 'block';
-                document.getElementById('start-screen').style.display = 'block';
-                updateHomeUI();
-            }
-        });
-
-        // On game over, show Google sign-in if not signed in
-        function showGameOver() {
-            // ... your existing game over logic ...
-            if (!isSignedIn) {
-                document.getElementById('gameover-google-signin-container').style.display = 'block';
-                // Also allow sign-in from game over page
-                document.getElementById('gameover-google-signin-btn').onclick = function() {
-                    document.getElementById('firebaseui-auth-container').style.display = 'block';
-                    ui.start('#firebaseui-auth-container', {
-                        signInOptions: [GoogleAuthProvider.PROVIDER_ID],
-                        callbacks: {
-                            signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                                document.getElementById('firebaseui-auth-container').style.display = 'none';
-                                return false;
-                            }
-                        }
-                    });
-                };
-            } else {
-                document.getElementById('gameover-google-signin-container').style.display = 'none';
-            }
-        }
     </script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
-    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.css" />
-    <script src="https://cdn.firebase.com/libs/firebaseui/6.0.2/firebaseui.js"></script>
 </body>
 </html>

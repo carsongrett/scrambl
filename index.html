@@ -29,6 +29,29 @@
     })();
     </script>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Your Firebase configuration
+       
+const firebaseConfig = {
+  apiKey: "AIzaSyD1sNTFNxF15_kIhxUplaq5EPasYOi_Bzs",
+  authDomain: "scrambl-1cc67.firebaseapp.com",
+  databaseURL: "https://scrambl-1cc67-default-rtdb.firebaseio.com",
+  projectId: "scrambl-1cc67",
+  storageBucket: "scrambl-1cc67.firebasestorage.app",
+  messagingSenderId: "589881408440",
+  appId: "1:589881408440:web:d8e3906bc040dd9a9bed4d",
+  measurementId: "G-XRCMRNC90E"
+};
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    
     <style>
         /* Color variables */
         :root {
@@ -488,6 +511,61 @@
         .stat-value {
             color: var(--accent-peach);
         }
+
+        /* Google Sign-in button styles */
+        .google-sign-in {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            color: #757575;
+            border: 1px solid #ddd;
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+        }
+
+        .google-sign-in:hover {
+            background-color: #f8f8f8;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--primary-dark);
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: var(--accent-main);
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .modal-content button {
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -506,6 +584,21 @@
             <!-- Added initials input -->
             <div class="initials-input">
                 <input type="text" id="player-initials" placeholder="Initials" maxlength="3" autocomplete="off">
+            </div>
+            
+            <!-- Sign in button -->
+            <button id="sign-in-btn" class="google-sign-in" style="display: none;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" style="width: 18px; margin-right: 8px;">
+                Sign in with Google
+            </button>
+            
+            <!-- Username modal -->
+            <div id="username-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <h3>Choose a Username</h3>
+                    <input type="text" id="username-input" placeholder="Enter username" maxlength="15">
+                    <button id="save-username-btn">Save Username</button>
+                </div>
             </div>
             
             <!-- Leaderboard display -->
@@ -702,8 +795,8 @@
                 
                 // 25 six-letter words
                 "ACROSS", "CUSTOM", "CAMERA", "ALMOND", "DRAGON", "FOREST", "JUMPER", "GUITAR", "ISLAND", "JACKET", 
-                "LADDER", "MARKET", "YELLOW", "ORANGE", "NARROW", "HEIGHT", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
-                "TURTLE", "VELVET", "DEFEND", "WINDOW", "WINTER",
+"LADDER", "MARKET", "YELLOW", "ORANGE", "NARROW", "HEIGHT", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
+"TURTLE", "VELVET", "DEFEND", "WINDOW", "WINTER",
                 
                 // 25 seven-letter words
                 "BANANA", "BUTTON", "UNCOVER", "JOURNEY", "DRAGON", "FOREST", "DIAMOND", "TWITTER", "ISLAND", "JACKET", 
@@ -1351,6 +1444,135 @@
                 start: startGame
             };
         })();
+    </script>
+
+    <script>
+        // Firebase Authentication and User Management
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        let currentUser = null;
+
+        // Check if user is signed in
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                // Check if user has a username
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (!userDoc.exists || !userDoc.data().username) {
+                    showUsernameModal();
+                } else {
+                    hideInitialsInput();
+                }
+            } else {
+                currentUser = null;
+                showInitialsInput();
+            }
+        });
+
+        // Sign in with Google
+        document.getElementById('sign-in-btn').addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch((error) => {
+                console.error('Error signing in with Google:', error);
+            });
+        });
+
+        // Username modal functions
+        function showUsernameModal() {
+            document.getElementById('username-modal').style.display = 'block';
+        }
+
+        function hideUsernameModal() {
+            document.getElementById('username-modal').style.display = 'none';
+        }
+
+        // Save username
+        document.getElementById('save-username-btn').addEventListener('click', async () => {
+            const username = document.getElementById('username-input').value.trim();
+            if (username && currentUser) {
+                try {
+                    await db.collection('users').doc(currentUser.uid).set({
+                        username: username,
+                        email: currentUser.email,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    hideUsernameModal();
+                    hideInitialsInput();
+                } catch (error) {
+                    console.error('Error saving username:', error);
+                }
+            }
+        });
+
+        // Show/hide initials input
+        function showInitialsInput() {
+            document.getElementById('player-initials').parentElement.style.display = 'block';
+            document.getElementById('sign-in-btn').style.display = 'block';
+        }
+
+        function hideInitialsInput() {
+            document.getElementById('player-initials').parentElement.style.display = 'none';
+            document.getElementById('sign-in-btn').style.display = 'none';
+        }
+
+        // Modify the existing saveScore function to include username
+        async function saveScore(score) {
+            const today = new Date().toISOString().split('T')[0];
+            const initials = currentUser ? 
+                (await db.collection('users').doc(currentUser.uid).get()).data().username :
+                document.getElementById('player-initials').value.toUpperCase();
+
+            if (!initials) return;
+
+            const scoreData = {
+                score: score,
+                initials: initials,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                await db.collection('scores').doc(today).collection('entries').add(scoreData);
+                updateLeaderboard();
+            } catch (error) {
+                console.error('Error saving score:', error);
+            }
+        }
+
+        // Modify the existing updateLeaderboard function
+        async function updateLeaderboard() {
+            const today = new Date().toISOString().split('T')[0];
+            const leaderboardEntries = document.getElementById('leaderboard-entries');
+            const playedTodayLeaderboardEntries = document.getElementById('played-today-leaderboard-entries');
+
+            try {
+                const snapshot = await db.collection('scores')
+                    .doc(today)
+                    .collection('entries')
+                    .orderBy('score', 'desc')
+                    .limit(10)
+                    .get();
+
+                const entries = snapshot.docs.map(doc => doc.data());
+                
+                // Update both leaderboards
+                [leaderboardEntries, playedTodayLeaderboardEntries].forEach(container => {
+                    if (entries.length === 0) {
+                        container.innerHTML = '<div class="leaderboard-empty">Be the first to rank!</div>';
+                        return;
+                    }
+
+                    container.innerHTML = entries.map((entry, index) => `
+                        <div class="leaderboard-entry ${entry.initials === (currentUser ? currentUser.username : document.getElementById('player-initials').value.toUpperCase()) ? 'highlight' : ''}">
+                            <span class="rank">#${index + 1}</span>
+                            <span class="initials">${entry.initials}</span>
+                            <span class="score">${entry.score}</span>
+                        </div>
+                    `).join('');
+                });
+            } catch (error) {
+                console.error('Error updating leaderboard:', error);
+            }
+        }
     </script>
 </body>
 </html>

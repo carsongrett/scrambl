@@ -945,7 +945,6 @@ const firebaseConfig = {
 
                 let username = null;
                 const user = firebase.auth().currentUser;
-                console.log('Current user:', user);
                 if (user && user.uid) {
                     try {
                         const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
@@ -956,9 +955,8 @@ const firebaseConfig = {
                         console.error('Error fetching username from Firestore:', e);
                     }
                 }
-                console.log('Username to save:', username);
 
-                // Save score to Firebase
+                // Save score to Realtime Database leaderboard (include username)
                 const leaderboardRef = getLeaderboardRef();
                 const newScoreRef = push(leaderboardRef);
                 set(newScoreRef, {
@@ -969,11 +967,11 @@ const firebaseConfig = {
                     timestamp: timestamp
                 })
                 .then(() => {
-                    console.log("Score saved to Firebase successfully");
+                    console.log("Score saved to Realtime Database leaderboard successfully");
                 })
                 .catch((error) => {
-                    console.error("Error saving score to Firebase:", error);
-                    // Fallback to localStorage if Firebase save fails
+                    console.error("Error saving score to Realtime Database leaderboard:", error);
+                    // Fallback to localStorage if save fails
                     dailyLeaderboard.push({
                         initials: initials,
                         username: username,

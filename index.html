@@ -942,10 +942,13 @@ const firebaseConfig = {
                     initials = initials.trim().toUpperCase().substring(0, 3);
                 }
                 playerInitials = initials;
+
                 let username = null;
-                if (window.currentUser && window.currentUser.uid) {
+                const user = firebase.auth().currentUser;
+                console.log('Current user:', user);
+                if (user && user.uid) {
                     try {
-                        const userDoc = await firebase.firestore().collection('users').doc(window.currentUser.uid).get();
+                        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
                         if (userDoc.exists && userDoc.data().username) {
                             username = userDoc.data().username;
                         }
@@ -953,6 +956,8 @@ const firebaseConfig = {
                         console.error('Error fetching username from Firestore:', e);
                     }
                 }
+                console.log('Username to save:', username);
+
                 // Save score to Firebase
                 const leaderboardRef = getLeaderboardRef();
                 const newScoreRef = push(leaderboardRef);

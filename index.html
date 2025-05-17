@@ -935,27 +935,27 @@ const firebaseConfig = {
                 }
             }
             
-            function addScoreToLeaderboard(initials, playerScore, timestamp) {
+            async function addScoreToLeaderboard(initials, playerScore, timestamp) {
                 if (!initials || initials.trim() === "") {
                     initials = "???";
                 } else {
                     initials = initials.trim().toUpperCase().substring(0, 3);
                 }
-                
                 playerInitials = initials;
-                
-                // Get username if signed in
                 let username = null;
-                if (window.currentUser && window.currentUser.displayName) {
-                    username = window.currentUser.displayName;
-                } else if (window.currentUser && window.currentUser.uid) {
-                    // Try to get username from Firestore if available
-                    // (This is async, but for leaderboard, we use displayName or initials)
+                if (window.currentUser && window.currentUser.uid) {
+                    try {
+                        const userDoc = await firebase.firestore().collection('users').doc(window.currentUser.uid).get();
+                        if (userDoc.exists && userDoc.data().username) {
+                            username = userDoc.data().username;
+                        }
+                    } catch (e) {
+                        console.error('Error fetching username from Firestore:', e);
+                    }
                 }
                 // Save score to Firebase
                 const leaderboardRef = getLeaderboardRef();
                 const newScoreRef = push(leaderboardRef);
-                
                 set(newScoreRef, {
                     initials: initials,
                     username: username, // Save username if available

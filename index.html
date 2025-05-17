@@ -1668,7 +1668,12 @@ const firebaseConfig = {
             const header = document.getElementById('signin-status-header');
             const user = firebase.auth().currentUser;
             const isHome = document.getElementById('start-screen')?.style.display !== 'none';
+            const signInBtn = document.getElementById('sign-in-btn');
+            const signInDesc = document.querySelector('.sign-in-desc');
             if (user && user.uid) {
+                // Hide sign in button and description
+                if (signInBtn) signInBtn.style.display = 'none';
+                if (signInDesc) signInDesc.style.display = 'none';
                 // Fetch username from Firestore
                 firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
                     let username = doc.exists && doc.data().username ? doc.data().username : user.email;
@@ -1676,6 +1681,9 @@ const firebaseConfig = {
                     header.style.display = 'block';
                 });
             } else {
+                // Show sign in button and description
+                if (signInBtn) signInBtn.style.display = '';
+                if (signInDesc) signInDesc.style.display = '';
                 if (!isHome) {
                     header.innerHTML = `<button class='signin-btn-top' onclick='document.getElementById("sign-in-btn").click()'>Sign in</button>`;
                     header.style.display = 'block';

@@ -1881,11 +1881,16 @@ const firebaseConfig = {
             const modal = document.getElementById('profile-modal');
             modal.style.display = 'block';
             loadProfileData();
+            // Trap focus for accessibility (optional improvement)
+            setTimeout(() => {
+                const closeBtn = document.getElementById('profile-close');
+                if (closeBtn) closeBtn.focus();
+            }, 100);
         }
 
         function hideProfile() {
-            const modal = document.getElementById('profile-modal');
-            modal.style.display = 'none';
+            var modal = document.getElementById('profile-modal');
+            if (modal) modal.style.display = 'none';
         }
 
         async function loadProfileData() {
@@ -2085,5 +2090,32 @@ const firebaseConfig = {
             </div>
         </div>
     </div>
+
+    <!-- Robust event listeners for closing the profile modal -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Always attach click event to the X button using event delegation
+            document.body.addEventListener('click', function(event) {
+                // X button
+                if (event.target && event.target.id === 'profile-close') {
+                    hideProfile();
+                }
+                // Click outside modal content
+                if (event.target && event.target.id === 'profile-modal') {
+                    hideProfile();
+                }
+            });
+            // Escape key closes modal
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    var modal = document.getElementById('profile-modal');
+                    if (modal && modal.style.display === 'block') {
+                        hideProfile();
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

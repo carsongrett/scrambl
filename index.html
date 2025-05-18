@@ -342,13 +342,13 @@
         
         .initials-input input {
             text-align: center;
-            width: 120px;
+            width: 200px; /* Increased width for usernames */
             padding: 8px 12px;
             border-radius: 12px;
             background-color: var(--primary-light);
             color: var(--text-dark);
             font-size: 1.1em;
-            text-transform: uppercase;
+            text-transform: none; /* Remove uppercase transform */
         }
         
         /* FIXED: Mobile responsiveness improvements - especially for when keyboard is open */
@@ -505,7 +505,7 @@
             
             <!-- Added initials input -->
             <div class="initials-input">
-                <input type="text" id="player-initials" placeholder="Initials" maxlength="3" autocomplete="off">
+                <input type="text" id="player-initials" placeholder="Enter username" maxlength="15" autocomplete="off">
             </div>
             
             <!-- Leaderboard display -->
@@ -681,16 +681,16 @@
             // Word list - simplified to array initialization
             const allWords = [
                 // 50 three-letter words
-                "ACE", "BAG", "BEE", "BOX", "BUG", "FUN", "PEN", "COW", "CUP", "EGG","EYE", "FAN", "FIN", "FLY", "FOX", "FUN", "GEM", "HEN", "YAK", "JOY", "KEY", 
-"KID", "HAT", "LIP", "MUD", "DOG", "PEN", "PIE", 
+                "ACE", "BAG", "BEE", "BOX", "BUG", "BUS", "CAP", "COW", "CUP", "EGG","EYE", "FAN", "FIN", "FLY", "FOX", "FUN", "GEM", "HEN", "ICE", "JOY", "KEY", 
+"KID", "LEG", "LIP", "MUD", "OWL", "PEN", "PIE", 
 "RUG", "SKY", "SUN", "TOE", "VAN", "WEB", "ZOO",
 
                 
                 // 50 four-letter words
                 "ABLE", "BABY", "BALL", "BEAR", "BELT", "BIKE", "BIRD", "BOAT", "BOOK", "BOWL", "CAKE", "CARD", "CASH", "CHEF", "COIN", "COOL", "DART", "DESK", "DISH", "DOOR", 
 "DRUM", "DUCK", "FISH", "FLAG", "FROG", "GAME", "GIFT", "GOLD", "HAIR", "HAND", 
-"HERO", "HOOK", "JUMP", "KITE", "LAMP", "LEAF", "THAT", "MOON", "NAIL", "PARK", 
-"PLUG", "RAIN", "RING", "ROCK", "ROPE", "SHIP", "GOOD", "TIRE", "TREE",
+"HERO", "HOOK", "JUMP", "KITE", "LAMP", "LEAF", "MASK", "MOON", "NAIL", "PARK", 
+"PLUG", "RAIN", "RING", "ROCK", "ROPE", "SHIP", "SHOE", "TIRE", "TREE",
 
                 
                 // 50 five-letter words
@@ -698,17 +698,17 @@
 "DREAM", "DRESS", "DRINK", "EAGLE", "EARTH", "FLAME", "FLUTE", "GHOST", "GLOBE", "GLOVE", 
 "GRAPE", "GREEN", "HOTEL", "HOUSE", "JEWEL", "KNIFE", "LEMON", "LIGHT", "MAGIC", "MEDAL", 
 "MONEY", "MOUSE", "MUSIC", "OCEAN", "PAINT", "PAPER", "PHONE", "PIANO", "PLANT", "PLATE", 
-"QUEEN", "RIVER", "DRUGS", "SNAKE", "SPACE", "SPOON", "STORM", "TIGER", "WATER",
+"QUEEN", "RIVER", "ROBOT", "SNAKE", "SPACE", "SPOON", "STORM", "TIGER", "WATER",
                 
                 // 25 six-letter words
-                "ACROSS", "CUSTOM", "CAMERA", "ALMOND", "DRAGON", "FOREST", "JUMPER", "GUITAR", "ISLAND", "JACKET", 
-                "LADDER", "MARKET", "YELLOW", "ORANGE", "NARROW", "HEIGHT", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
-                "TURTLE", "VELVET", "DEFEND", "WINDOW", "WINTER",
+                "BANANA", "BUTTON", "CAMERA", "COFFEE", "DRAGON", "FOREST", "GARDEN", "GUITAR", "ISLAND", "JACKET", 
+                "LADDER", "MARKET", "MONKEY", "ORANGE", "PENCIL", "POCKET", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
+                "TURTLE", "VELVET", "WALLET", "WINDOW", "WINTER",
                 
                 // 25 seven-letter words
-                "BANANA", "BUTTON", "UNCOVER", "JOURNEY", "DRAGON", "FOREST", "DIAMOND", "TWITTER", "ISLAND", "JACKET", 
-"ANALOGY", "MARKET", "QUARTER", "ORANGE", "FACTORY", "GIRAFFE", "ROCKET", "SANDWICH", "HAMSTER", "MISSION", 
-"VINTAGE", "VELVET", "LANTERN", "TEXTURE", "WINTER"
+                "BANANA", "BUTTON", "CAMERA", "COFFEE", "DRAGON", "FOREST", "GARDEN", "GUITAR", "ISLAND", "JACKET", 
+"LADDER", "MARKET", "MONKEY", "ORANGE", "PENCIL", "POCKET", "ROCKET", "SANDWICH", "SCHOOL", "TICKET", 
+"TURTLE", "VELVET", "WALLET", "WINDOW", "WINTER"
             ];
             
             // Game constants and variables
@@ -813,7 +813,7 @@
                         Object.keys(data).forEach(key => {
                             dailyLeaderboard.push({
                                 id: key,
-                                initials: data[key].initials,
+                                username: data[key].username,
                                 score: data[key].score,
                                 wordsSolved: data[key].wordsSolved,
                                 timestamp: data[key].timestamp
@@ -844,9 +844,9 @@
             
             function addScoreToLeaderboard(initials, playerScore, timestamp) {
                 if (!initials || initials.trim() === "") {
-                    initials = "???";
+                    initials = "Anonymous";
                 } else {
-                    initials = initials.trim().toUpperCase().substring(0, 3);
+                    initials = initials.trim();
                 }
                 
                 playerInitials = initials;
@@ -856,7 +856,7 @@
                 const newScoreRef = push(leaderboardRef);
                 
                 set(newScoreRef, {
-                    initials: initials,
+                    username: initials,
                     score: playerScore,
                     wordsSolved: wordsSolved,
                     timestamp: timestamp
@@ -869,7 +869,7 @@
                     
                     // Fallback to localStorage if Firebase save fails
                     dailyLeaderboard.push({
-                        initials: initials,
+                        username: initials,
                         score: playerScore,
                         wordsSolved: wordsSolved,
                         timestamp: timestamp
@@ -893,14 +893,14 @@
                 const displayCount = Math.min(dailyLeaderboard.length, MAX_LEADERBOARD_ENTRIES);
                 for (let i = 0; i < displayCount; i++) {
                     const entry = dailyLeaderboard[i];
-                    const isCurrentPlayer = entry.initials === playerInitials && 
+                    const isCurrentPlayer = entry.username === playerInitials && 
                                            entry.score === score && 
                                            entry.timestamp === lastSolveTime;
                     
                     const entryDiv = document.createElement("div");
                     entryDiv.className = `leaderboard-entry ${isCurrentPlayer ? "highlight" : ""}`;
                     entryDiv.innerHTML = `
-                        <span><span class="rank">${i + 1}.</span> <span class="initials">${entry.initials}</span></span>
+                        <span><span class="rank">${i + 1}.</span> <span class="initials">${entry.username}</span></span>
                         <span class="score">${entry.score} pts</span>
                     `;
                     containerElement.appendChild(entryDiv);
@@ -958,7 +958,7 @@
                     localStorage.setItem('lastPlayedDate', today);
                     localStorage.setItem('lastScore', finalScore);
                     localStorage.setItem('wordsSolved', wordsSolved);
-                    localStorage.setItem('lastInitials', playerInitials);
+                    localStorage.setItem('lastUsername', playerInitials);
                     
                     // Save streak
                     if (finalScore > 0) {
@@ -1150,7 +1150,7 @@
                 
                 // Get player initials
                 playerInitials = elements.playerInitialsInput.value.trim().toUpperCase().substring(0, 3);
-                localStorage.setItem('lastInitials', playerInitials);
+                localStorage.setItem('lastUsername', playerInitials);
                 
                 // Reset game variables
                 currentWordIndex = 0;
@@ -1190,7 +1190,7 @@
                     localStorage.removeItem('lastPlayedDate');
                     localStorage.removeItem('lastScore');
                     localStorage.removeItem('wordsSolved');
-                    // Don't remove lastInitials so we can remember the player
+                    // Don't remove lastUsername so we can remember the player
                 }
                 
                 dailyWords = getDailyWords(today.split("?")[0]);
@@ -1201,11 +1201,11 @@
                 // Load leaderboard from Firebase
                 loadLeaderboard();
                 
-                // Set previous initials if available
-                const lastInitials = localStorage.getItem('lastInitials');
-                if (lastInitials) {
-                    elements.playerInitialsInput.value = lastInitials;
-                    playerInitials = lastInitials;
+                // Set previous username if available
+                const lastUsername = localStorage.getItem('lastUsername');
+                if (lastUsername) {
+                    elements.playerInitialsInput.value = lastUsername;
+                    playerInitials = lastUsername;
                 }
                 
                 // Track page view
@@ -1242,7 +1242,8 @@
             
             // Add event listener for the initials input to enforce uppercase
             elements.playerInitialsInput.addEventListener("input", function() {
-                this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                // Allow alphanumeric characters and underscores, max 15 chars
+                this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '').substring(0, 15);
             });
             
             // Share button tracking

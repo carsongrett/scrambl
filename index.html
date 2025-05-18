@@ -285,7 +285,7 @@
             background: rgba(132, 220, 198, 0.2);
             padding: 10px;
             border-radius: 12px;
-            max-width: 280px;
+            max-width: 320px;
             margin: 15px auto;
         }
         
@@ -298,16 +298,17 @@
         .leaderboard-entries {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
         }
         
         .leaderboard-entry {
             display: flex;
             justify-content: space-between;
-            padding: 5px 8px;
+            padding: 4px 8px;
             border-radius: 8px;
             background: rgba(75, 78, 109, 0.5);
             color: var(--text-light);
+            font-size: 0.95em;
         }
         
         .leaderboard-entry.highlight {
@@ -751,7 +752,7 @@
             // New variables for leaderboard functionality
             let playerInitials = "";
             let dailyLeaderboard = [];
-            const MAX_LEADERBOARD_ENTRIES = 3;
+            const MAX_LEADERBOARD_ENTRIES = 5;
 
             // Cache DOM elements
             const elements = {

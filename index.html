@@ -940,9 +940,14 @@
                             });
                         });
                     }
+                    // Debug: log the allTimeLeaderboard array
+                    console.log('allTimeLeaderboard:', allTimeLeaderboard);
                     // Sort by total score
                     allTimeLeaderboard.sort((a, b) => b.totalScore - a.totalScore);
                     // Update all-time leaderboard displays
+                    console.log('allTimeLeaderboardEntries:', elements.allTimeLeaderboardEntries);
+                    console.log('gameOverAllTimeLeaderboardEntries:', elements.gameOverAllTimeLeaderboardEntries);
+                    console.log('playedTodayAllTimeLeaderboardEntries:', elements.playedTodayAllTimeLeaderboardEntries);
                     updateLeaderboardDisplay(elements.allTimeLeaderboardEntries, true);
                     updateLeaderboardDisplay(elements.gameOverAllTimeLeaderboardEntries, true);
                     updateLeaderboardDisplay(elements.playedTodayAllTimeLeaderboardEntries, true);
@@ -1003,11 +1008,18 @@
             }
             
             function updateLeaderboardDisplay(containerElement, isAllTime) {
-                if (!containerElement) return; // Skip if container element doesn't exist
-                
+                if (!containerElement) {
+                    console.warn('Leaderboard container element missing:', containerElement, isAllTime);
+                    return; // Skip if container element doesn't exist
+                }
                 const leaderboard = isAllTime ? allTimeLeaderboard : dailyLeaderboard;
                 const title = isAllTime ? "all-time top scores" : "today's top scores";
-                
+                // Debug: log the leaderboard being used
+                if (isAllTime) {
+                    console.log('Rendering allTimeLeaderboard:', leaderboard);
+                } else {
+                    console.log('Rendering dailyLeaderboard:', leaderboard);
+                }
                 if (leaderboard.length === 0) {
                     containerElement.innerHTML = `<div class="leaderboard-empty">Be the first to rank!</div>`;
                     return;

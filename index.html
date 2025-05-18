@@ -488,10 +488,37 @@
         .stat-value {
             color: var(--accent-peach);
         }
+        
+        /* Add username display styles */
+        .username-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(75, 78, 109, 0.8);
+            padding: 8px 16px;
+            border-radius: 12px;
+            color: var(--accent-main);
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: none; /* Hidden by default, shown when username is set */
+        }
+        
+        @media (max-width: 480px) {
+            .username-display {
+                top: 10px;
+                right: 10px;
+                font-size: 1em;
+                padding: 6px 12px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
+        <!-- Add username display -->
+        <div class="username-display" id="username-display"></div>
+        
         <!-- Replaced h1 with logo image -->
         <div class="logo-container">
             <img src="scrambl-logo.png" alt="Scrambl" class="game-logo">
@@ -756,8 +783,9 @@
                 playerInitialsInput: document.getElementById("player-initials"),
                 leaderboardEntries: document.getElementById("leaderboard-entries"),
                 gameOverLeaderboardEntries: document.getElementById("game-over-leaderboard-entries"),
-		playedTodayLeaderboardEntries: document.getElementById("played-today-leaderboard-entries"),
-                comboDisplay: document.getElementById("combo-display")
+                playedTodayLeaderboardEntries: document.getElementById("played-today-leaderboard-entries"),
+                comboDisplay: document.getElementById("combo-display"),
+                usernameDisplay: document.getElementById("username-display")
             };
 
             // Helper functions
@@ -1148,9 +1176,10 @@
             function startGame() {
                 if (hasPlayedToday()) return;
                 
-                // Get player initials
-                playerInitials = elements.playerInitialsInput.value.trim().toUpperCase().substring(0, 3);
+                // Get player username
+                playerInitials = elements.playerInitialsInput.value.trim();
                 localStorage.setItem('lastUsername', playerInitials);
+                updateUsernameDisplay(playerInitials);
                 
                 // Reset game variables
                 currentWordIndex = 0;
@@ -1206,6 +1235,7 @@
                 if (lastUsername) {
                     elements.playerInitialsInput.value = lastUsername;
                     playerInitials = lastUsername;
+                    updateUsernameDisplay(lastUsername);
                 }
                 
                 // Track page view
@@ -1240,10 +1270,11 @@
             elements.submitBtn.addEventListener("click", checkAnswer);
             elements.skipBtn.addEventListener("click", skipWord);
             
-            // Add event listener for the initials input to enforce uppercase
+            // Add event listener for the username input
             elements.playerInitialsInput.addEventListener("input", function() {
                 // Allow alphanumeric characters and underscores, max 15 chars
                 this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '').substring(0, 15);
+                updateUsernameDisplay(this.value);
             });
             
             // Share button tracking
@@ -1329,6 +1360,16 @@
                 }, (error) => {
                     console.error("Error getting word stats:", error);
                 });
+            }
+
+            // Function to update username display
+            function updateUsernameDisplay(username) {
+                if (username && username.trim() !== "") {
+                    elements.usernameDisplay.textContent = username;
+                    elements.usernameDisplay.style.display = "block";
+                } else {
+                    elements.usernameDisplay.style.display = "none";
+                }
             }
 
             // Public API

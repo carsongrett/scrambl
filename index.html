@@ -583,7 +583,7 @@
             
             <!-- All-time Leaderboard display -->
             <div class="leaderboard" id="all-time-leaderboard">
-                <h3>all-time top scores</h3>
+                <h3>all-time players</h3>
                 <div class="leaderboard-entries" id="all-time-leaderboard-entries">
                     <div class="leaderboard-empty">Play to get on the board</div>
                 </div>
@@ -623,7 +623,7 @@
     
     <!-- Added all-time leaderboard to played-today screen -->
     <div class="leaderboard" id="played-today-all-time-leaderboard">
-        <h3>all-time top scores</h3>
+        <h3>all-time players</h3>
         <div class="leaderboard-entries" id="played-today-all-time-leaderboard-entries">
             <div class="leaderboard-empty">Be the first to rank!</div>
         </div>
@@ -693,7 +693,7 @@
     
     <!-- Added all-time leaderboard to game over screen -->
     <div class="leaderboard" id="game-over-all-time-leaderboard">
-        <h3>all-time top scores</h3>
+        <h3>all-time players</h3>
         <div class="leaderboard-entries" id="game-over-all-time-leaderboard-entries">
             <div class="leaderboard-empty">Be the first to rank!</div>
         </div>
@@ -1016,7 +1016,7 @@
                     return; // Skip if container element doesn't exist
                 }
                 const leaderboard = isAllTime ? allTimeLeaderboard : dailyLeaderboard;
-                const title = isAllTime ? "all-time top scores" : "today's top scores";
+                const title = isAllTime ? "all-time players" : "today's top scores";
                 // Debug: log the leaderboard being used
                 if (isAllTime) {
                     console.log('Rendering allTimeLeaderboard:', leaderboard);

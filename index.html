@@ -681,13 +681,13 @@
             // Word list - simplified to array initialization
             const allWords = [
                 // 50 three-letter words
-                "ACE", "BAG", "BEE", "BOX", "BUG", "COW", "CUP", "EGG","EYE", "FAN", "FIN", "FLY", "FOX", "FUN", "GEM", "HEN", "YAK", "JOY", "KEY", 
+                "ACE", "BAG", "BEE", "BOX", "BUG", "FUN", "PEN", "COW", "CUP", "EGG","EYE", "FAN", "FIN", "FLY", "FOX", "FUN", "GEM", "HEN", "YAK", "JOY", "KEY", 
 "KID", "HAT", "LIP", "MUD", "DOG", "PEN", "PIE", 
 "RUG", "SKY", "SUN", "TOE", "VAN", "WEB", "ZOO",
 
                 
                 // 50 four-letter words
-                "ABLE", "BABY", "BALL", "BEAR", "BELT", "BIKE", "GOLF", "BOAT", "BOOK", "BOWL", "CAKE", "CARD", "CASH", "CHEF", "COIN", "COOL", "DART", "DESK", "DISH", "DOOR", 
+                "ABLE", "BABY", "BALL", "BEAR", "BELT", "BIKE", "BIRD", "BOAT", "BOOK", "BOWL", "CAKE", "CARD", "CASH", "CHEF", "COIN", "COOL", "DART", "DESK", "DISH", "DOOR", 
 "DRUM", "DUCK", "FISH", "FLAG", "FROG", "GAME", "GIFT", "GOLD", "HAIR", "HAND", 
 "HERO", "HOOK", "JUMP", "KITE", "LAMP", "LEAF", "THAT", "MOON", "NAIL", "PARK", 
 "PLUG", "RAIN", "RING", "ROCK", "ROPE", "SHIP", "GOOD", "TIRE", "TREE",
@@ -1286,13 +1286,6 @@
                 const dateKey = getCurrentDateCT().split("?")[0].replace(/-/g, "");
                 const statsRef = ref(firebaseDB, `wordStats/${dateKey}/${word}`);
                 
-                console.log('Updating word stats:', {
-                    word,
-                    isSolved,
-                    dateKey,
-                    path: `wordStats/${dateKey}/${word}`
-                });
-                
                 // Get current stats
                 get(statsRef).then((snapshot) => {
                     const data = snapshot.val() || { solved: 0, skipped: 0 };
@@ -1301,11 +1294,8 @@
                     } else {
                         data.skipped = (data.skipped || 0) + 1;
                     }
-                    console.log('New stats data:', data);
                     // Update stats
                     return set(statsRef, data);
-                }).then(() => {
-                    console.log('Stats updated successfully');
                 }).catch((error) => {
                     console.error("Error updating word stats:", error);
                 });
@@ -1315,13 +1305,9 @@
                 const dateKey = getCurrentDateCT().split("?")[0].replace(/-/g, "");
                 const statsRef = ref(firebaseDB, `wordStats/${dateKey}`);
                 
-                console.log('Getting stats for date:', dateKey);
-                
                 // Set up real-time listener for stats
                 onValue(statsRef, (snapshot) => {
                     const stats = snapshot.val() || {};
-                    console.log('Received stats from Firebase:', stats);
-                    
                     let mostSolved = { word: '-', count: 0 };
                     let mostSkipped = { word: '-', count: 0 };
                     
@@ -1333,8 +1319,6 @@
                             mostSkipped = { word, count: data.skipped };
                         }
                     });
-                    
-                    console.log('Calculated most stats:', { mostSolved, mostSkipped });
                     
                     // Update both game over and played today displays
                     document.getElementById('most-solved-word').textContent = mostSolved.word;

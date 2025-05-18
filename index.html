@@ -20,7 +20,7 @@
         gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-L4YDGSZDV1';
         gaScript.async = true;
         document.head.appendChild(gaScript);
-        
+        image.png
         // Initialize Google Analytics
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
@@ -814,6 +814,7 @@
             let playerInitials = "";
             let dailyLeaderboard = [];
             const MAX_LEADERBOARD_ENTRIES = 5;
+            let allTimeLeaderboard = [];
 
             // Cache DOM elements
             const elements = {
@@ -928,8 +929,7 @@
                 // Set up real-time listener for all-time leaderboard updates
                 onValue(allTimeLeaderboardRef, (snapshot) => {
                     const data = snapshot.val();
-                    let allTimeLeaderboard = [];
-                    
+                    allTimeLeaderboard = [];
                     if (data) {
                         Object.keys(data).forEach(key => {
                             allTimeLeaderboard.push({
@@ -940,10 +940,8 @@
                             });
                         });
                     }
-                    
                     // Sort by total score
                     allTimeLeaderboard.sort((a, b) => b.totalScore - a.totalScore);
-                    
                     // Update all-time leaderboard displays
                     updateLeaderboardDisplay(elements.allTimeLeaderboardEntries, true);
                     updateLeaderboardDisplay(elements.gameOverAllTimeLeaderboardEntries, true);

@@ -926,6 +926,8 @@
                     updateLeaderboardDisplay(elements.playedTodayLeaderboardEntries, false);
                 });
 
+                // Debug: confirm this code is reached
+                console.log('Setting up allTimeLeaderboard listener');
                 // Set up real-time listener for all-time leaderboard updates
                 onValue(allTimeLeaderboardRef, (snapshot) => {
                     const data = snapshot.val();

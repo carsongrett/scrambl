@@ -1852,7 +1852,6 @@ const firebaseConfig = {
         // Listen for auth state changes and page changes
         firebase.auth().onAuthStateChanged(updateSigninStatusHeader);
         // Also update on navigation (show/hide screens)
-        const origShow = HTMLElement.prototype.style;
         window.addEventListener('DOMContentLoaded', () => {
             updateSigninStatusHeader();
             // Patch show/hide logic for screens

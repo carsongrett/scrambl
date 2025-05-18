@@ -1858,6 +1858,22 @@ const firebaseConfig = {
             // Patch show/hide logic for screens
             const observer = new MutationObserver(updateSigninStatusHeader);
             observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+
+            // Ensure X button always works
+            const profileCloseBtn = document.getElementById('profile-close');
+            if (profileCloseBtn) {
+                profileCloseBtn.addEventListener('click', hideProfile);
+            }
+
+            // Also close profile modal when clicking outside
+            const profileModal = document.getElementById('profile-modal');
+            if (profileModal) {
+                window.addEventListener('click', (event) => {
+                    if (event.target === profileModal) {
+                        hideProfile();
+                    }
+                });
+            }
         });
 
         // Profile functionality
@@ -1902,6 +1918,10 @@ const firebaseConfig = {
 
                 scoresSnapshot.forEach(doc => {
                     const scoreData = doc.data();
+                    if (!scoreData.timestamp) {
+                        console.warn('Score entry missing timestamp:', doc.id, scoreData);
+                        return;
+                    }
                     scores.push({
                         date: scoreData.timestamp.toDate(),
                         score: scoreData.score,
@@ -1922,61 +1942,62 @@ const firebaseConfig = {
                 // Update score history table
                 const tbody = document.getElementById('profile-score-history');
                 tbody.innerHTML = '';
-                scores.forEach(score => {
+                if (scores.length === 0) {
                     const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${score.date.toLocaleDateString()}</td>
-                        <td>${score.score}</td>
-                        <td>${score.wordsSolved}</td>
-                    `;
+                    row.innerHTML = `<td colspan="3" style="text-align:center;color:#aaa;">No games played in the last 30 days.</td>`;
                     tbody.appendChild(row);
-                });
+                } else {
+                    scores.forEach(score => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${score.date.toLocaleDateString()}</td>
+                            <td>${score.score}</td>
+                            <td>${score.wordsSolved}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
             } catch (error) {
                 console.error('Error loading profile data:', error);
             }
         }
 
         // Username edit functionality
-        document.getElementById('profile-username-edit').addEventListener('click', async () => {
-            const usernameSpan = document.getElementById('profile-username');
-            const currentUsername = usernameSpan.textContent;
-            const newUsername = prompt('Enter new username:', currentUsername);
-            
-            if (newUsername && newUsername.trim() && newUsername !== currentUsername) {
-                const user = firebase.auth().currentUser;
-                if (user) {
-                    try {
-                        await firebase.firestore().collection('users').doc(user.uid).update({
-                            username: newUsername.trim(),
-                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        usernameSpan.textContent = newUsername.trim();
-                        updateSigninStatusHeader(); // Update header with new username
-                    } catch (error) {
-                        console.error('Error updating username:', error);
-                        alert('Failed to update username. Please try again.');
+        const profileUsernameEditBtn = document.getElementById('profile-username-edit');
+        if (profileUsernameEditBtn) {
+            profileUsernameEditBtn.addEventListener('click', async () => {
+                const usernameSpan = document.getElementById('profile-username');
+                const currentUsername = usernameSpan.textContent;
+                const newUsername = prompt('Enter new username:', currentUsername);
+                
+                if (newUsername && newUsername.trim() && newUsername !== currentUsername) {
+                    const user = firebase.auth().currentUser;
+                    if (user) {
+                        try {
+                            await firebase.firestore().collection('users').doc(user.uid).update({
+                                username: newUsername.trim(),
+                                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            usernameSpan.textContent = newUsername.trim();
+                            updateSigninStatusHeader(); // Update header with new username
+                        } catch (error) {
+                            console.error('Error updating username:', error);
+                            alert('Failed to update username. Please try again.');
+                        }
                     }
                 }
-            }
-        });
-
-        // Close profile modal when clicking the X button
-        document.getElementById('profile-close').addEventListener('click', hideProfile);
-
-        // Close profile modal when clicking outside
-        window.addEventListener('click', (event) => {
-            const modal = document.getElementById('profile-modal');
-            if (event.target === modal) {
-                hideProfile();
-            }
-        });
+            });
+        }
 
         // Save score to user's history
         async function saveUserScore(score, wordsSolved) {
             const user = firebase.auth().currentUser;
-            if (!user) return;
-
+            if (!user) {
+                console.warn('Not signed in, not saving user score.');
+                return;
+            }
             try {
+                console.log('Saving user score:', score, wordsSolved);
                 await firebase.firestore()
                     .collection('userScores')
                     .doc(user.uid)
@@ -1986,19 +2007,38 @@ const firebaseConfig = {
                         wordsSolved: wordsSolved,
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                console.log('User score saved successfully.');
             } catch (error) {
                 console.error('Error saving user score:', error);
             }
         }
 
-        // Modify the existing endGame function to save user score
-        const originalEndGame = ScramblGame.endGame;
-        ScramblGame.endGame = function() {
-            originalEndGame();
-            if (firebase.auth().currentUser) {
-                saveUserScore(score, wordsSolved);
+        // Patch ScramblGame.endGame to always save user score for signed-in users
+        (function() {
+            // Find the original endGame function
+            let originalEndGame = null;
+            if (window.ScramblGame && typeof window.ScramblGame.endGame === 'function') {
+                originalEndGame = window.ScramblGame.endGame;
             }
-        };
+            // Patch only if not already patched
+            if (originalEndGame && !window.ScramblGame._endGamePatched) {
+                window.ScramblGame.endGame = function() {
+                    // Try to get score and wordsSolved from DOM if not in scope
+                    let score = 0, wordsSolved = 0;
+                    try {
+                        score = parseInt(document.getElementById('score')?.textContent || '0', 10);
+                        wordsSolved = parseInt(document.getElementById('words-solved')?.textContent || '0', 10);
+                    } catch (e) {
+                        console.warn('Could not get score/wordsSolved from DOM:', e);
+                    }
+                    if (firebase.auth().currentUser) {
+                        saveUserScore(score, wordsSolved);
+                    }
+                    return originalEndGame.apply(this, arguments);
+                };
+                window.ScramblGame._endGamePatched = true;
+            }
+        })();
     </script>
 
     <!-- Add Profile Modal -->

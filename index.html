@@ -289,43 +289,6 @@
             margin: 15px auto;
         }
         
-        /* All-time leaderboard specific styles */
-        #all-time-leaderboard,
-        #played-today-all-time-leaderboard,
-        #game-over-all-time-leaderboard {
-            background: rgba(224, 119, 125, 0.15); /* Using accent-red with low opacity */
-        }
-        
-        #all-time-leaderboard h3,
-        #played-today-all-time-leaderboard h3,
-        #game-over-all-time-leaderboard h3 {
-            color: var(--accent-red); /* Using accent-red for the title */
-        }
-        
-        #all-time-leaderboard .leaderboard-entry,
-        #played-today-all-time-leaderboard .leaderboard-entry,
-        #game-over-all-time-leaderboard .leaderboard-entry {
-            background: rgba(75, 78, 109, 0.6); /* Slightly darker background */
-        }
-        
-        #all-time-leaderboard .leaderboard-entry .initials,
-        #played-today-all-time-leaderboard .leaderboard-entry .initials,
-        #game-over-all-time-leaderboard .leaderboard-entry .initials {
-            color: var(--accent-red); /* Using accent-red for usernames */
-        }
-        
-        #all-time-leaderboard .leaderboard-entry .score,
-        #played-today-all-time-leaderboard .leaderboard-entry .score,
-        #game-over-all-time-leaderboard .leaderboard-entry .score {
-            color: var(--accent-peach); /* Keeping the score color consistent */
-        }
-        
-        #all-time-leaderboard .leaderboard-entry.highlight,
-        #played-today-all-time-leaderboard .leaderboard-entry.highlight,
-        #game-over-all-time-leaderboard .leaderboard-entry.highlight {
-            background: rgba(224, 119, 125, 0.3); /* Using accent-red for highlight */
-        }
-        
         .leaderboard h3 {
             margin: 0 0 10px 0;
             font-size: 1.2em;
@@ -581,14 +544,6 @@
                 </div>
             </div>
             
-            <!-- All-time Leaderboard display -->
-            <div class="leaderboard" id="all-time-leaderboard">
-                <h3>all-time players</h3>
-                <div class="leaderboard-entries" id="all-time-leaderboard-entries">
-                    <div class="leaderboard-empty">Play to get on the board</div>
-                </div>
-            </div>
-            
             <!-- Streak display -->
             <div class="streak-display" id="streak-display"></div>
             
@@ -617,14 +572,6 @@
     <div class="leaderboard" id="played-today-leaderboard">
         <h3>today's top scores</h3>
         <div class="leaderboard-entries" id="played-today-leaderboard-entries">
-            <div class="leaderboard-empty">Be the first to rank!</div>
-        </div>
-    </div>
-    
-    <!-- Added all-time leaderboard to played-today screen -->
-    <div class="leaderboard" id="played-today-all-time-leaderboard">
-        <h3>all-time players</h3>
-        <div class="leaderboard-entries" id="played-today-all-time-leaderboard-entries">
             <div class="leaderboard-empty">Be the first to rank!</div>
         </div>
     </div>
@@ -687,14 +634,6 @@
     <div class="leaderboard" id="game-over-leaderboard">
         <h3>today's top scores</h3>
         <div class="leaderboard-entries" id="game-over-leaderboard-entries">
-            <div class="leaderboard-empty">Be the first to rank!</div>
-        </div>
-    </div>
-    
-    <!-- Added all-time leaderboard to game over screen -->
-    <div class="leaderboard" id="game-over-all-time-leaderboard">
-        <h3>all-time players</h3>
-        <div class="leaderboard-entries" id="game-over-all-time-leaderboard-entries">
             <div class="leaderboard-empty">Be the first to rank!</div>
         </div>
     </div>
@@ -813,7 +752,6 @@
             let playerInitials = "";
             let dailyLeaderboard = [];
             const MAX_LEADERBOARD_ENTRIES = 5;
-            let allTimeLeaderboard = [];
 
             // Cache DOM elements
             const elements = {
@@ -839,9 +777,6 @@
                 leaderboardEntries: document.getElementById("leaderboard-entries"),
                 gameOverLeaderboardEntries: document.getElementById("game-over-leaderboard-entries"),
                 playedTodayLeaderboardEntries: document.getElementById("played-today-leaderboard-entries"),
-                allTimeLeaderboardEntries: document.getElementById("all-time-leaderboard-entries"),
-                gameOverAllTimeLeaderboardEntries: document.getElementById("game-over-all-time-leaderboard-entries"),
-                playedTodayAllTimeLeaderboardEntries: document.getElementById("played-today-all-time-leaderboard-entries"),
                 shareLink: document.getElementById("share-link"),
                 shareLinkPlayed: document.getElementById("share-link-played"),
                 twitterShare: document.getElementById("twitter-share"),
@@ -889,13 +824,8 @@
                 return ref(firebaseDB, `leaderboards/${dateKey}`);
             }
             
-            function getAllTimeLeaderboardRef() {
-                return ref(firebaseDB, 'allTimeLeaderboard');
-            }
-            
             function loadLeaderboard() {
                 const leaderboardRef = getLeaderboardRef();
-                const allTimeLeaderboardRef = getAllTimeLeaderboardRef();
                 
                 // Set up real-time listener for daily leaderboard updates
                 onValue(leaderboardRef, (snapshot) => {
@@ -920,38 +850,9 @@
                     dailyLeaderboard.sort((a, b) => b.score - a.score);
                     
                     // Update all daily leaderboard displays
-                    updateLeaderboardDisplay(elements.leaderboardEntries, false);
-                    updateLeaderboardDisplay(elements.gameOverLeaderboardEntries, false);
-                    updateLeaderboardDisplay(elements.playedTodayLeaderboardEntries, false);
-                });
-
-                // Debug: confirm this code is reached
-                console.log('Setting up allTimeLeaderboard listener');
-                // Set up real-time listener for all-time leaderboard updates
-                onValue(allTimeLeaderboardRef, (snapshot) => {
-                    const data = snapshot.val();
-                    allTimeLeaderboard = [];
-                    if (data) {
-                        Object.keys(data).forEach(key => {
-                            allTimeLeaderboard.push({
-                                id: key,
-                                username: data[key].username,
-                                totalScore: data[key].totalScore,
-                                gamesPlayed: data[key].gamesPlayed
-                            });
-                        });
-                    }
-                    // Debug: log the allTimeLeaderboard array
-                    console.log('allTimeLeaderboard:', allTimeLeaderboard);
-                    // Sort by total score
-                    allTimeLeaderboard.sort((a, b) => b.totalScore - a.totalScore);
-                    // Update all-time leaderboard displays
-                    console.log('allTimeLeaderboardEntries:', elements.allTimeLeaderboardEntries);
-                    console.log('gameOverAllTimeLeaderboardEntries:', elements.gameOverAllTimeLeaderboardEntries);
-                    console.log('playedTodayAllTimeLeaderboardEntries:', elements.playedTodayAllTimeLeaderboardEntries);
-                    updateLeaderboardDisplay(elements.allTimeLeaderboardEntries, true);
-                    updateLeaderboardDisplay(elements.gameOverAllTimeLeaderboardEntries, true);
-                    updateLeaderboardDisplay(elements.playedTodayAllTimeLeaderboardEntries, true);
+                    updateLeaderboardDisplay(elements.leaderboardEntries);
+                    updateLeaderboardDisplay(elements.gameOverLeaderboardEntries);
+                    updateLeaderboardDisplay(elements.playedTodayLeaderboardEntries);
                 });
             }
             
@@ -976,22 +877,6 @@
                 })
                 .then(() => {
                     console.log("Score saved to daily leaderboard successfully");
-                    
-                    // Update all-time leaderboard
-                    const allTimeRef = getAllTimeLeaderboardRef();
-                    const userRef = ref(firebaseDB, `allTimeLeaderboard/${initials}`);
-                    
-                    // Get current all-time stats
-                    get(userRef).then((snapshot) => {
-                        const currentStats = snapshot.val() || { totalScore: 0, gamesPlayed: 0 };
-                        
-                        // Update stats
-                        set(userRef, {
-                            username: initials,
-                            totalScore: currentStats.totalScore + playerScore,
-                            gamesPlayed: currentStats.gamesPlayed + 1
-                        });
-                    });
                 })
                 .catch((error) => {
                     console.error("Error saving score to Firebase:", error);
@@ -1008,20 +893,13 @@
                 });
             }
             
-            function updateLeaderboardDisplay(containerElement, isAllTime) {
+            function updateLeaderboardDisplay(containerElement) {
                 if (!containerElement) {
-                    console.warn('Leaderboard container element missing:', containerElement, isAllTime);
+                    console.warn('Leaderboard container element missing:', containerElement);
                     return; // Skip if container element doesn't exist
                 }
-                const leaderboard = isAllTime ? allTimeLeaderboard : dailyLeaderboard;
-                const title = isAllTime ? "all-time players" : "today's top scores";
-                // Debug: log the leaderboard being used
-                if (isAllTime) {
-                    console.log('Rendering allTimeLeaderboard:', leaderboard);
-                } else {
-                    console.log('Rendering dailyLeaderboard:', leaderboard);
-                }
-                if (leaderboard.length === 0) {
+                
+                if (dailyLeaderboard.length === 0) {
                     containerElement.innerHTML = `<div class="leaderboard-empty">Be the first to rank!</div>`;
                     return;
                 }
@@ -1029,27 +907,20 @@
                 containerElement.innerHTML = "";
                 
                 // Display top entries
-                const displayCount = Math.min(leaderboard.length, MAX_LEADERBOARD_ENTRIES);
+                const displayCount = Math.min(dailyLeaderboard.length, MAX_LEADERBOARD_ENTRIES);
                 for (let i = 0; i < displayCount; i++) {
-                    const entry = leaderboard[i];
-                    const isCurrentPlayer = !isAllTime && entry.username === playerInitials && 
-                                           entry.score === score && 
-                                           entry.timestamp === lastSolveTime;
+                    const entry = dailyLeaderboard[i];
+                    const isCurrentPlayer = entry.username === playerInitials && 
+                                         entry.score === score && 
+                                         entry.timestamp === lastSolveTime;
                     
                     const entryDiv = document.createElement("div");
                     entryDiv.className = `leaderboard-entry ${isCurrentPlayer ? "highlight" : ""}`;
                     
-                    if (isAllTime) {
-                        entryDiv.innerHTML = `
-                            <span><span class="rank">${i + 1}.</span> <span class="initials">${entry.username}</span></span>
-                            <span class="score">${entry.gamesPlayed} games | ${entry.totalScore} pts</span>
-                        `;
-                    } else {
-                        entryDiv.innerHTML = `
-                            <span><span class="rank">${i + 1}.</span> <span class="initials">${entry.username}</span></span>
-                            <span class="score">${entry.score} pts</span>
-                        `;
-                    }
+                    entryDiv.innerHTML = `
+                        <span><span class="rank">${i + 1}.</span> <span class="initials">${entry.username}</span></span>
+                        <span class="score">${entry.score} pts</span>
+                    `;
                     containerElement.appendChild(entryDiv);
                 }
             }
@@ -1346,7 +1217,7 @@
                 // Update streak display
                 updateStreakDisplay();
                 
-                // Load both daily and all-time leaderboards from Firebase
+                // Load leaderboard from Firebase
                 loadLeaderboard();
                 
                 // Set previous username if available
